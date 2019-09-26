@@ -21,5 +21,4 @@ plt.hist(x, bins=100)
 plt.plot(bin_centers, predicted_bin_heights, '-r')
 plt.show()
 
-#this is a test
 
