@@ -10,24 +10,18 @@ data = mat['amp_data']
 
 ## 1a ##
 
-# # plot sequence of data
-# plt.plot(data)
-# plt.xlabel('Time')
-# plt.ylabel('Amplitude (m)')
-# plt.show()
-# """"
-#
-# """
-#
-# # plot histogram of amplitudes
-# plt.clf()
-# plt.hist(data, bins=100)
-# plt.xlabel('Amplitude (m)')
-# plt.ylabel('Frequency')
-# plt.show()
-# """"
-#
-# """
+# plot sequence of data
+plt.plot(data)
+plt.xlabel('Time')
+plt.ylabel('Amplitude (m)')
+plt.show()
+
+# plot histogram of amplitudes
+plt.clf()
+plt.hist(data, bins=100)
+plt.xlabel('Amplitude (m)')
+plt.ylabel('Frequency')
+plt.show()
 
 ## 1b ##
 
