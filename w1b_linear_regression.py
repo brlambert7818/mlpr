@@ -49,4 +49,6 @@ def fit_and_plot(phi_fn, xx, yy):
     plt.show()
 
 
-fit_and_plot(phi_linear, xx, yy)
+#fit_and_plot(phi_linear, xx, yy)
+x = np.random.normal(0, 1, (5, 20))
+phi_x = phi_quadratic(x)
