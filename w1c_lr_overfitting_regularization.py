@@ -13,15 +13,19 @@ def average_noise(N, D, lam):
     x_reg = np.concatenate([x_bias, lam_matrix])
     w_fit = np.linalg.lstsq(x_bias, y)[0]
     w_fit_reg = np.linalg.lstsq(x_reg, y_reg)[0]
+    print(y_reg.shape)
+    print(x_bias.shape)
+    print(x_reg.shape)
+    print(w_fit_reg.shape)
 
-    plt.clf()
-    plt.plot(x, y, 'b.')
-    plt.plot(x, np.dot(x_bias, w_fit), 'r.')
-    plt.plot(x, x_bias, w_fit_reg, 'g.')
-    plt.show()
+    # plt.clf()
+    # plt.plot(x, y, 'b.')
+    # plt.plot(x, np.dot(x_bias, w_fit), 'r.')
+    # plt.plot(x, x_bias, w_fit_reg, 'g.')
+    # plt.show()
 
 
-average_noise(50, 5, 3)
+average_noise(50, 3, 3)
 
 
 

@@ -5,60 +5,39 @@
 
 # You will need numpy and scipy:
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-from scipy.io import loadmat
 
-### Q1
-data = loadmat('ct_data.mat')
 
-## Q1a
-#print(np.round(np.mean(data['y_train'])) == 0)
+def fit_linreg(X, yy, alpha):
+    N = X.shape[0]
+    D = X.shape[1]
 
-# y_val mean and SE
-mu_y_val = np.mean(data['y_val'])
-se_y_val = np.std(data['y_val']) / np.sqrt(len(data['y_val']))
+    X_bias = np.concatenate([X, np.ones((N, 1))], axis=1)
+    y_reg = np.concatenate([yy, np.zeros((D+1, 1))])
+    alpha_matrix = np.sqrt(alpha) * np.eye(D+1)
 
-# y_train mean and SE
-mu_y_train = np.mean(data['y_train'])
-se_y_train = np.std(data['y_train']) / np.sqrt(len(data['y_train']))
+    # standard regularization
+    X_reg = np.concatenate([X_bias, alpha_matrix])
+    w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
+    # print(w_fit[0, 0])
 
-# compare mean and SE between y_val and y_train
-# plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
-#              fmt='.k')
-# plt.show()
+    # remove the regularization of bias
+    # X_reg[N, 0] = 0
+    # w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
+    # print(w_fit[0, 0])
 
-## Q1b
+    return w_fit
 
-# find input features with constant values
-X_test_T = data['X_test'].T
-n_features_start = len(X_test_T)
-const_cols = []
-i = 0
-for col in X_test_T:
-    if len(set(col)) == 1:
-        const_cols.append(i)
-    i += 1
-# print(non_uniq_cols)
 
-# remove input features with constant values
-data_names = ['X_train', 'X_val', 'X_test']
-for d in data_names:
-    data[d] = np.delete(data[d], const_cols, axis=1)
+def rmse_lstsq(w, X, y):
+    N = X.shape[0]
+    X_bias = np.concatenate([X, np.ones((N, 1))], axis=1)
+    return np.sqrt(np.mean(np.square(np.dot(X_bias, w) - y)))
 
-# find duplicate input features
-n_features = len(data['X_test'].T)
-unique, uniq_index = np.unique(data['X_test'], axis=1, return_index=True)
-duplicate_indices = list(set(range(n_features)) - set(uniq_index))
 
-# remove duplicate input features
-for d in data_names:
-    data[d] = np.delete(data[d], duplicate_indices, axis=1)
-
-# check dimensions
-print('# final features = # original features - # constant features - # duplicate features')
-print(str(len(data['X_test'].T)) + ' = ' + str(n_features_start) + ' - '
-      + str(len(const_cols)) + ' - ' + str(len(duplicate_indices)))
+def rmse_grad(w, b, X, y):
+    N = X.shape[0]
+    return np.sqrt(np.mean(np.square(np.dot(X, w) + b - y)))
 
 
 def params_unwrap(param_vec, shapes, sizes):
@@ -102,7 +81,7 @@ def minimize_list(cost, init_list, args):
     The Matlab code comes with a different optimizer, so won't give the same
     results.
     """
-    opt = {'maxiter': 500, 'disp': False}
+    opt = {'maxiter': 10, 'disp': True}
     init, unwrap = params_wrap(init_list)
     def wrap_cost(vec, *args):
         E, params_bar = cost(unwrap(vec), *args)
