@@ -20,12 +20,9 @@ def fit_linreg(X, yy, alpha):
     y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((D+1, 1))])
     alpha_matrix = np.sqrt(alpha) * np.identity(D+1)
 
-    # standard regularization
     X_reg = np.concatenate([X_bias, alpha_matrix])
-    # w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
-
     # remove the regularization of bias
-    X_reg[N, 0] = 0
+    X_reg[N, -1] = 0
     w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
 
@@ -170,6 +167,9 @@ def random_proj(D, K=None, seed=0):
     R /= np.linalg.norm(R, axis=1, keepdims=True)
 
     return R
+
+
+def aug_fn(X): return np.concatenate([X, X == 0, X < 0], axis=1)
 
 
 def logreg_cost(params, X, yy, alpha):

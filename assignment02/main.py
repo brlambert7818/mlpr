@@ -59,41 +59,67 @@ duplicate_indices = list(set(range(n_features)) - set(uniq_index))
 ### Q2
 
 # fit model with lstsq using fit_linreg()
-w_fit = fit_linreg(data['X_train'], data['y_train'], 10)
+# w_fit = fit_linreg(data['X_train'], data['y_train'], 10)
+# print('full feature linreg rmse:')
+# print(rmse_lstsq(w_fit, data['X_train'], data['y_train']))
+# print(rmse_lstsq(w_fit, data['X_val'], data['y_val']))
+# print('')
+#
+# # fit model with gradient approach using fit_linreg_gradopt()
+# w_fit, b_fit = fit_linreg_gradopt(data['X_train'], data['y_train'], 10)
+# print('full feature gradopt rmse:')
+# print(rmse_grad(w_fit, b_fit, data['X_train'], data['y_train']))
+# print(rmse_grad(w_fit, b_fit, data['X_val'], data['y_val']))
+# print('')
+#
+# ### Q3
+#
+# ## Q3a
+# D_test = data['X_test'].shape[1]
+#
+# # k = 10
+# R_10 = random_proj(D_test, 10)
+# X_train_reduc = np.matmul(data['X_train'], R_10)
+# X_val_reduc = np.matmul(data['X_val'], R_10)
+#
+# w_fit = fit_linreg(X_train_reduc, data['y_train'], 10)
+# print('10 feature rmse:')
+# print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
+# print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
+# print('')
+#
+# # k = 100
+# R_100 = random_proj(D_test, 100)
+# X_train_reduc = np.matmul(data['X_train'], R_100)
+# X_val_reduc = np.matmul(data['X_val'], R_100)
+#
+# w_fit = fit_linreg(X_train_reduc, data['y_train'], 100)
+# print('100 feature rmse:')
+# print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
+# print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
+
+## Q3b
+
+# histogram of 46th feature
+# plt.hist(data['X_train'].T[45])
+# plt.show()
+
+# % X-train values = -0.25
+# count_25 = 0
+# for row in data['X_train']:
+#     count_25 += (row == -0.25).sum()
+
+# % X-train values = 0
+# count_0 = 0
+# for row in data['X_train']:
+#     count_0 += (row == 0).sum()
+
+# use aug_fn() to add extra binary features to X_train
+X_train_aug = aug_fn(data['X_train'])
+X_val_aug = aug_fn(data['X_val'])
+
+# report rmse for augmented training and validation sets
+w_fit = fit_linreg(X_train_aug, data['y_train'], 10)
 print('full feature linreg rmse:')
-print(rmse_lstsq(w_fit, data['X_train'], data['y_train']))
-print(rmse_lstsq(w_fit, data['X_val'], data['y_val']))
-print('')
-
-# fit model with gradient approach using fit_linreg_gradopt()
-w_fit, b_fit = fit_linreg_gradopt(data['X_train'], data['y_train'], 10)
-print('full feature gradopt rmse:')
-print(rmse_grad(w_fit, b_fit, data['X_train'], data['y_train']))
-print(rmse_grad(w_fit, b_fit, data['X_val'], data['y_val']))
-print('')
-
-### Q3
-
-## Q3a
-D_test = data['X_test'].shape[1]
-
-# k = 10
-R_10 = random_proj(D_test, 10)
-X_train_reduc = np.matmul(data['X_train'], R_10)
-X_val_reduc = np.matmul(data['X_val'], R_10)
-
-w_fit = fit_linreg(X_train_reduc, data['y_train'], 10)
-print('10 feature rmse:')
-print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
-print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
-print('')
-
-# k = 100
-R_100 = random_proj(D_test, 100)
-X_train_reduc = np.matmul(data['X_train'], R_100)
-X_val_reduc = np.matmul(data['X_val'], R_100)
-
-w_fit = fit_linreg(X_train_reduc, data['y_train'], 100)
-print('100 feature rmse:')
-print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
-print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
+print(rmse_lstsq(w_fit, X_train_aug, data['y_train']))
+print(rmse_lstsq(w_fit, X_val_aug, data['y_val']))
