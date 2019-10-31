@@ -8,36 +8,36 @@ import numpy as np
 from scipy.optimize import minimize
 
 
+def phi_linear(xin):
+    return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
+
+
 def fit_linreg(X, yy, alpha):
     N = X.shape[0]
     D = X.shape[1]
 
-    X_bias = np.concatenate([X, np.ones((N, 1))], axis=1)
-    y_reg = np.concatenate([yy, np.zeros((D+1, 1))])
-    alpha_matrix = np.sqrt(alpha) * np.eye(D+1)
+    X_bias = phi_linear(X)
+    y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((D+1, 1))])
+    alpha_matrix = np.sqrt(alpha) * np.identity(D+1)
 
     # standard regularization
     X_reg = np.concatenate([X_bias, alpha_matrix])
-    w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
-    # print(w_fit[0, 0])
+    # w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
 
     # remove the regularization of bias
-    # X_reg[N, 0] = 0
-    # w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
-    # print(w_fit[0, 0])
-
+    X_reg[N, 0] = 0
+    w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
 
 
 def rmse_lstsq(w, X, y):
-    N = X.shape[0]
-    X_bias = np.concatenate([X, np.ones((N, 1))], axis=1)
-    return np.sqrt(np.mean(np.square(np.dot(X_bias, w) - y)))
+    y_pred = np.dot(phi_linear(X), w)
+    return (np.square(np.subtract(y[:, np.newaxis], y_pred)).mean())**0.5
 
 
 def rmse_grad(w, b, X, y):
-    N = X.shape[0]
-    return np.sqrt(np.mean(np.square(np.dot(X, w) + b - y)))
+    y_pred = np.add(np.dot(X, w), b)
+    return (np.square(np.subtract(y, y_pred)).mean())**0.5
 
 
 def params_unwrap(param_vec, shapes, sizes):
@@ -81,7 +81,7 @@ def minimize_list(cost, init_list, args):
     The Matlab code comes with a different optimizer, so won't give the same
     results.
     """
-    opt = {'maxiter': 10, 'disp': True}
+    opt = {'maxiter': 500, 'disp': False}
     init, unwrap = params_wrap(init_list)
     def wrap_cost(vec, *args):
         E, params_bar = cost(unwrap(vec), *args)

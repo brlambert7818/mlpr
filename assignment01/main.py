@@ -170,7 +170,7 @@ def findVC(data, ys):
     tempMSE = np.zeros((20, 1))
     V = []
     for i in range(1, 21):
-        tempV = np.linalg.lstsq(data.T[-i:, :].T, ys[:, np.newaxis], rcond=-1)[0]
+        tempV = np.linalg.lstsq(data.T[-i:, :].T, ys[:, np.newanewaxis], rcond=-1)[0]
         V.append(tempV)
         tempMSE[i - 1] = np.square(np.dot(tempV.T, data.T[-i:, ]) - ys[:, np.newaxis].T).mean()
     optimC = np.argmin(tempMSE) + 1
