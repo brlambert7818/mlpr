@@ -140,6 +140,18 @@ def fit_linreg_gradopt(X, yy, alpha):
     ww, bb = minimize_list(linreg_cost, init, args)
     return ww, bb
 
+# Fit logistic regression using gradient descent optimiser
+    """ 
+    EDIT docstring for fitting 
+    """
+def fit_logreg_gradopt(X, yy, alpha):
+    D = X.shape[1]
+    args = (X, yy, alpha)
+#    init = (np.zeros(D), np.array(0)) #start with zeros
+    init = (np.random.randn(D),np.random.randn(1)) #start with random weights
+    ww, bb = minimize_list(logreg_cost, init, args)
+    return ww,bb
+    
 
 def random_proj(D, K=None, seed=0):
     """return random projection matrix

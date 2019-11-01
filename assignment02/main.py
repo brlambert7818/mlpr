@@ -149,3 +149,46 @@ w_fit = fit_linreg(X_train_aug, data['y_train'], 10)
 print('full feature linreg rmse:')
 print(rmse_lstsq(w_fit, X_train_aug, data['y_train']))
 print(rmse_lstsq(w_fit, X_val_aug, data['y_val']))
+
+
+### Q4
+K = 10 # number of thresholded classification problems to fit
+mx = np.max(data['y_train'])
+mn = np.min(data['y_train'])
+hh = (mx-mn)/(K+1) 
+thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True) 
+Ws=[]
+Bs=[]
+Pred_train=np.zeros((data['y_train'].shape[0],K))
+Pred_val=np.zeros((data['y_val'].shape[0],K))
+RMSE_train=np.zeros((K))
+RMSE_val = np.zeros((K))
+
+#Fit logistic regression with gradient descent optimiser
+for kk in range(K):
+    labels = data['y_train'] > thresholds[kk] #labels for train set
+    labels_val = data['y_val'] > thresholds[kk] #labels for val set
+    
+    #fit log reg for each class(this or other)
+    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(data['X_train'], labels, 10) 
+    
+    #Calculate RMSE on train set
+    aa_train = np.dot(w_fit_temp[np.newaxis,:],data['X_train'].T).T+b_fitG_temp
+    sigma_train = 1/(1 + np.exp(-aa_train))
+    Pred_train[:,kk]=sigma_train[:,-1]
+    RMSE_train[kk] = (np.square(sigma_train-(labels*1)[:,np.newaxis]).mean())**0.5
+    
+    #Calculate RMSE on val set
+    aa_val = np.dot(w_fit_temp[np.newaxis,:],data['X_val'].T).T+b_fitG_temp
+    sigma_val = 1/(1 + np.exp(-aa_val))
+    Pred_val[:,kk]=sigma_val[:,-1]
+    RMSE_val[kk] = (np.square(sigma_val-(labels_val*1)[:,np.newaxis]).mean())**0.5
+    
+    #Keep weights and b's
+    Ws.append(w_fit_temp)
+    Bs.append(b_fitG_temp)
+
+    
+
+
+
