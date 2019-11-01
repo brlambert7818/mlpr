@@ -17,8 +17,9 @@ def fit_linreg(X, yy, alpha):
     D = X.shape[1]
 
     X_bias = phi_linear(X)
-    y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((D+1, 1))])
-    alpha_matrix = np.sqrt(alpha) * np.identity(D+1)
+    K = X_bias.shape[0]
+    y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((K, 1))])
+    alpha_matrix = np.sqrt(alpha) * np.identity(K)
 
     X_reg = np.concatenate([X_bias, alpha_matrix])
     # remove the regularization of bias
