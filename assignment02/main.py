@@ -102,25 +102,40 @@ print(rmse_lstsq(w_fit_reduc100, X_val_reduc100, data['y_val']))
 
 # Q3b
 
-# histogram of 46th feature
-plt.hist(data['X_train'].T[45],bins=10)
+# histogram of 46th feature and three extra random features for comparison
+noBins = 15
+whichFeatures = np.concatenate([[45],np.random.randint(0,data['X_train'].shape[1],5) ])
+f1 = plt.gcf()
+for i in range(0,6):
+    plt.subplot(2,3,i+1)
+    plt.hist(data['X_train'].T[whichFeatures[i]],bins=noBins)
+    plt.title('hist. for feature '+ str(whichFeatures[i]+1))
+    plt.xlabel('X_train values',fontsize=14)
+    plt.ylabel('frequency',fontsize=14)
+    plt.subplots_adjust(hspace = 0.8, left=0.1, wspace=0.5)
+    plt.xticks(np.arange(-0.25,1.25,step=0.25))
 plt.show()
-whichFeatures = np.concatenate([[45],np.random.randint(0,data['X_train'].shape[1],3) ])
-for i in range(0,4):
-    plt.subplot(2,2,i+1)
-    plt.hist(data['X_train'].T[whichFeatures[i]],bins=10)
-    plt.title('feature '+ str(whichFeatures[i]))
-    plt.subplots_adjust(hspace = 0.9, left=0.2)
+f1.set_size_inches(12, 7)
+f1.savefig('3b_hist.pdf')
+    
 
+no_of_val_train = data['X_train'].shape[0]*data['X_train'].shape[1] #number of all values in X_train
 # X-train values = -0.25
 count_25 = 0
 for row in data['X_train']:
     count_25 += (row == -0.25).sum()
 
+frac_25 = count_25/(no_of_val_train)
+print('Fraction of values=-0.25: ' + str(frac_25))
+
 # X-train values = 0
 count_0 = 0
 for row in data['X_train']:
     count_0 += (row == 0).sum()
+    
+frac_0 = count_0/(no_of_val_train)
+print('Fraction of values=0: ' + str(frac_0))
+
 
 # use aug_fn() to add extra binary features to X_train
 X_train_aug = aug_fn(data['X_train'])

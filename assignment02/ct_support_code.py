@@ -169,7 +169,8 @@ def random_proj(D, K=None, seed=0):
     return R
 
 
-def aug_fn(X): return np.concatenate([X, X == 0, X < 0], axis=1)
+def aug_fn(X): 
+    return np.concatenate([X, X == 0, X < 0], axis=1)
 
 
 def logreg_cost(params, X, yy, alpha):
