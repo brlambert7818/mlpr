@@ -25,7 +25,6 @@ plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_
 plt.show()
 
 ## Q1b
-#anotehr subfeature that brina hates
 # find input features with constant values
 X_train_T = data['X_train'].T
 n_features_start = len(X_train_T)
