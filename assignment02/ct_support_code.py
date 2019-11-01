@@ -12,9 +12,6 @@ def phi_linear(xin):
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
 def fit_linreg(X, yy, alpha):
-    N = X.shape[0]
-    D = X.shape[1]
-
     X_bias = phi_linear(X)
     K = X_bias.shape[0]
     y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((K, 1))])
