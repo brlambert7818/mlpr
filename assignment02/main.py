@@ -4,7 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ### Q1
-data = loadmat('ct_data.mat', squeeze_me=True)
+
+#data = loadmat('ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+
 
 ## Q1a
 #print(np.round(np.mean(data['y_train'])) == 0)

@@ -13,7 +13,7 @@ def phi_linear(xin):
 
 def fit_linreg(X, yy, alpha):
     X_bias = phi_linear(X)
-    K = X_bias.shape[0]
+    K = X_bias.shape[1]
     y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((K, 1))])
     alpha_matrix = np.sqrt(alpha) * np.identity(K)
 
