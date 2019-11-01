@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 ### Q1
 data = loadmat('ct_data.mat', squeeze_me=True)
 
+
+#one suvb features that brian likes
 ## Q1a
 #print(np.round(np.mean(data['y_train'])) == 0)
 
@@ -23,7 +25,6 @@ plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_
 plt.show()
 
 ## Q1b
-
 # find input features with constant values
 X_train_T = data['X_train'].T
 n_features_start = len(X_train_T)
