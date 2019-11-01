@@ -1,13 +1,11 @@
-from assignment02.ct_support_code import *
+from ct_support_code import * #assignment02.ct_support_code
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
-#adasdas
+
 ### Q1
 data = loadmat('ct_data.mat', squeeze_me=True)
 
-
-#one suvb features that brian likes
 ## Q1a
 #print(np.round(np.mean(data['y_train'])) == 0)
 
@@ -25,6 +23,7 @@ plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_
 plt.show()
 
 ## Q1b
+
 # find input features with constant values
 X_train_T = data['X_train'].T
 n_features_start = len(X_train_T)
@@ -47,8 +46,8 @@ unique, uniq_index = np.unique(data['X_train'], axis=1, return_index=True)
 duplicate_indices = list(set(range(n_features)) - set(uniq_index))
 
 # remove duplicate input features
-# for d in data_names:
-#     data[d] = np.delete(data[d], duplicate_indices, axis=1)
+for d in data_names:
+     data[d] = np.delete(data[d], duplicate_indices, axis=1)
 
 # check dimensions
 # print('# final features = # original features - # constant features - # duplicate features')
@@ -59,60 +58,69 @@ duplicate_indices = list(set(range(n_features)) - set(uniq_index))
 ### Q2
 
 # fit model with lstsq using fit_linreg()
-# w_fit = fit_linreg(data['X_train'], data['y_train'], 10)
-# print('full feature linreg rmse:')
-# print(rmse_lstsq(w_fit, data['X_train'], data['y_train']))
-# print(rmse_lstsq(w_fit, data['X_val'], data['y_val']))
-# print('')
-#
-# # fit model with gradient approach using fit_linreg_gradopt()
-# w_fit, b_fit = fit_linreg_gradopt(data['X_train'], data['y_train'], 10)
-# print('full feature gradopt rmse:')
-# print(rmse_grad(w_fit, b_fit, data['X_train'], data['y_train']))
-# print(rmse_grad(w_fit, b_fit, data['X_val'], data['y_val']))
-# print('')
-#
-# ### Q3
-#
-# ## Q3a
-# D_test = data['X_test'].shape[1]
-#
-# # k = 10
-# R_10 = random_proj(D_test, 10)
-# X_train_reduc = np.matmul(data['X_train'], R_10)
-# X_val_reduc = np.matmul(data['X_val'], R_10)
-#
-# w_fit = fit_linreg(X_train_reduc, data['y_train'], 10)
-# print('10 feature rmse:')
-# print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
-# print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
-# print('')
-#
-# # k = 100
-# R_100 = random_proj(D_test, 100)
-# X_train_reduc = np.matmul(data['X_train'], R_100)
-# X_val_reduc = np.matmul(data['X_val'], R_100)
-#
-# w_fit = fit_linreg(X_train_reduc, data['y_train'], 100)
-# print('100 feature rmse:')
-# print(rmse_lstsq(w_fit, X_train_reduc, data['y_train']))
-# print(rmse_lstsq(w_fit, X_val_reduc, data['y_val']))
+w_fit = fit_linreg(data['X_train'], data['y_train'], 10)
+print('full feature linreg rmse:')
+print(rmse_lstsq(w_fit, data['X_train'], data['y_train']))
+print(rmse_lstsq(w_fit, data['X_val'], data['y_val']))
+print('')
 
-## Q3b
+ # fit model with gradient approach using fit_linreg_gradopt()
+w_fitG, b_fitG = fit_linreg_gradopt(data['X_train'], data['y_train'], 10)
+print('full feature gradopt rmse:')
+print(rmse_grad(w_fitG, b_fitG, data['X_train'], data['y_train']))
+print(rmse_grad(w_fitG, b_fitG, data['X_val'], data['y_val']))
+print('')
+ 
+# Yes, the results are the same, as the gradient descent optimizer approaches the LS-solution.
+
+
+### Q3
+
+## Q3a
+D_test = data['X_test'].shape[1]
+
+# k = 10
+R_10 = random_proj(D_test, 10)
+X_train_reduc10 = np.matmul(data['X_train'], R_10)
+X_val_reduc10 = np.matmul(data['X_val'], R_10)
+
+w_fit_reduc10 = fit_linreg(X_train_reduc10, data['y_train'], 10)
+print('10 feature rmse:')
+print(rmse_lstsq(w_fit_reduc10, X_train_reduc10, data['y_train']))
+print(rmse_lstsq(w_fit_reduc10, X_val_reduc10, data['y_val']))
+print('')
+
+# k = 100
+R_100 = random_proj(D_test, 100)
+X_train_reduc100 = np.matmul(data['X_train'], R_100)
+X_val_reduc100 = np.matmul(data['X_val'], R_100)
+
+w_fit_reduc100 = fit_linreg(X_train_reduc100, data['y_train'], 100)
+print('100 feature rmse:')
+print(rmse_lstsq(w_fit_reduc100, X_train_reduc100, data['y_train']))
+print(rmse_lstsq(w_fit_reduc100, X_val_reduc100, data['y_val']))
+
+# Q3b
 
 # histogram of 46th feature
-# plt.hist(data['X_train'].T[45])
-# plt.show()
+plt.hist(data['X_train'].T[45],bins=10)
+plt.show()
+whichFeatures = np.concatenate([[45],np.random.randint(0,data['X_train'].shape[1],3) ])
+for i in range(0,4):
+    plt.subplot(2,2,i+1)
+    plt.hist(data['X_train'].T[whichFeatures[i]],bins=10)
+    plt.title('feature '+ str(whichFeatures[i]))
+    plt.subplots_adjust(hspace = 0.9, left=0.2)
 
-# % X-train values = -0.25
-# count_25 = 0
-# for row in data['X_train']:
-#     count_25 += (row == -0.25).sum()
+# X-train values = -0.25
+count_25 = 0
+for row in data['X_train']:
+    count_25 += (row == -0.25).sum()
 
-# % X-train values = 0
-# count_0 = 0
-# for row in data['X_train']:
-#     count_0 += (row == 0).sum()
+# X-train values = 0
+count_0 = 0
+for row in data['X_train']:
+    count_0 += (row == 0).sum()
 
 # use aug_fn() to add extra binary features to X_train
 X_train_aug = aug_fn(data['X_train'])

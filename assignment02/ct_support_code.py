@@ -11,7 +11,6 @@ from scipy.optimize import minimize
 def phi_linear(xin):
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
-
 def fit_linreg(X, yy, alpha):
     N = X.shape[0]
     D = X.shape[1]
@@ -23,7 +22,7 @@ def fit_linreg(X, yy, alpha):
 
     X_reg = np.concatenate([X_bias, alpha_matrix])
     # remove the regularization of bias
-    X_reg[N, -1] = 0
+    X_reg[-1, -1] = 0
     w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
 
