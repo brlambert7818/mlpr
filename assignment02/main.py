@@ -2,7 +2,7 @@ from assignment02.ct_support_code import *
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
-
+print('fuck off')
 
 ### Q1
 data = loadmat('ct_data.mat', squeeze_me=True)
