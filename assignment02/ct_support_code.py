@@ -12,30 +12,28 @@ def phi_linear(xin):
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
 
-def fit_linreg(X, yy, alpha):
-    N = X.shape[0]
-    D = X.shape[1]
+def sigmoid(a): return 1 / (1 + np.exp(-a))
 
+
+def fit_linreg(X, yy, alpha):
     X_bias = phi_linear(X)
-    K = X_bias.shape[0]
+    K = X_bias.shape[1]
     y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((K, 1))])
     alpha_matrix = np.sqrt(alpha) * np.identity(K)
 
     X_reg = np.concatenate([X_bias, alpha_matrix])
     # remove the regularization of bias
-    X_reg[N, -1] = 0
+    X_reg[-1, -1] = 0
     w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
 
 
-def rmse_lstsq(w, X, y):
-    y_pred = np.dot(phi_linear(X), w)
-    return (np.square(np.subtract(y[:, np.newaxis], y_pred)).mean())**0.5
+def rmse_lstsq(y_hat, y):
+    return (np.square(np.subtract(y[:, np.newaxis], y_hat)).mean())**0.5
 
 
-def rmse_grad(w, b, X, y):
-    y_pred = np.add(np.dot(X, w), b)
-    return (np.square(np.subtract(y, y_pred)).mean())**0.5
+def rmse_grad(y_hat, y):
+    return (np.square(np.subtract(y, y_hat)).mean())**0.5
 
 
 def params_unwrap(param_vec, shapes, sizes):
@@ -144,6 +142,17 @@ def fit_linreg_gradopt(X, yy, alpha):
     ww, bb = minimize_list(linreg_cost, init, args)
     return ww, bb
 
+def fit_logreg_gradopt(X, yy, alpha):
+    """ 
+    Fit logistic regression using gradient descent optimiser
+    """
+    D = X.shape[1]
+    args = (X, yy, alpha)
+#    init = (np.zeros(D), np.array(0)) #start with zeros
+    init = (np.random.randn(D),np.random.randn(1)) #start with random weights
+    ww, bb = minimize_list(logreg_cost, init, args)
+    return ww,bb
+    
 
 def random_proj(D, K=None, seed=0):
     """return random projection matrix
@@ -170,7 +179,8 @@ def random_proj(D, K=None, seed=0):
     return R
 
 
-def aug_fn(X): return np.concatenate([X, X == 0, X < 0], axis=1)
+def aug_fn(X): 
+    return np.concatenate([X, X == 0, X < 0], axis=1)
 
 
 def logreg_cost(params, X, yy, alpha):
