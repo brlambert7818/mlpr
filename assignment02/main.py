@@ -1,12 +1,12 @@
-from assignment02.ct_support_code import *
+from ct_support_code import *
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
 
 ### Q1
 
-data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
-# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+#data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+ data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
 
 
 ## Q1a
@@ -167,35 +167,21 @@ mx = np.max(data['y_train'])
 mn = np.min(data['y_train'])
 hh = (mx-mn)/(K+1)
 thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True)
-Ws = []
-Bs = []
-Pred_train = np.zeros((data['y_train'].shape[0], K))
-Pred_val = np.zeros((data['y_val'].shape[0], K))
-RMSE_train = np.zeros(K)
-RMSE_val = np.zeros(K)
+Ws= np.zeros((data['X_train'].shape[1]+1, K))
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
     labels = data['y_train'] > thresholds[kk] # labels for train set
-    labels_val = data['y_val'] > thresholds[kk] # labels for val set
 
     # fit log reg for each class(this or other)
     w_fit_temp, b_fitG_temp = fit_logreg_gradopt(data['X_train'], labels, 10)
 
-    # Calculate RMSE on train set
-    aa_train = np.dot(w_fit_temp[np.newaxis, :], data['X_train'].T).T + b_fitG_temp
-    sigma_train = sigmoid(aa_train)
-    Pred_train[:, kk] = sigma_train[:, -1]
-    # RMSE_train[kk] = (np.square(sigma_train-(labels*1)[:, np.newaxis]).mean())**0.5
-    RMSE_train[kk] = rmse_grad(sigma_train, labels*1[:, np.newaxis])
+    Ws[:-1,kk] = w_fit_temp
+    Ws[-1,kk] = b_fitG_temp
+    
+X_bias_train = phi_linear(data['X_train'])
+X_bias_val = phi_linear(data['X_val'])
 
-    # Calculate RMSE on val set
-    aa_val = np.dot(w_fit_temp[np.newaxis, :], data['X_val'].T).T + b_fitG_temp
-    sigma_val = sigmoid(aa_val)
-    Pred_val[:, kk] = sigma_val[:, -1]
-    # RMSE_val[kk] = (np.square(sigma_val-(labels_val*1)[:, np.newaxis]).mean())**0.5
-    RMSE_val[kk] = rmse_grad(sigma_val, labels_val*1[:, np.newaxis])
+Pred_train = sigmoid(np.matmul(X_bias_train,Ws))
+Pred_val = sigmoid(np.matmul(X_bias_val,Ws))
 
-    # Keep weights and b's
-    Ws.append(w_fit_temp)
-    Bs.append(b_fitG_temp)
