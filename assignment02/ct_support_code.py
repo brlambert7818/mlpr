@@ -11,6 +11,10 @@ from scipy.optimize import minimize
 def phi_linear(xin):
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
+
+def sigmoid(a): return 1 / (1 + np.exp(-a))
+
+
 def fit_linreg(X, yy, alpha):
     X_bias = phi_linear(X)
     K = X_bias.shape[1]
@@ -24,14 +28,12 @@ def fit_linreg(X, yy, alpha):
     return w_fit
 
 
-def rmse_lstsq(w, X, y):
-    y_pred = np.dot(phi_linear(X), w)
-    return (np.square(np.subtract(y[:, np.newaxis], y_pred)).mean())**0.5
+def rmse_lstsq(y_hat, y):
+    return (np.square(np.subtract(y[:, np.newaxis], y_hat)).mean())**0.5
 
 
-def rmse_grad(w, b, X, y):
-    y_pred = np.add(np.dot(X, w), b)
-    return (np.square(np.subtract(y, y_pred)).mean())**0.5
+def rmse_grad(y_hat, y):
+    return (np.square(np.subtract(y, y_hat)).mean())**0.5
 
 
 def params_unwrap(param_vec, shapes, sizes):
