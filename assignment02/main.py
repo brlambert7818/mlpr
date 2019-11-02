@@ -14,7 +14,6 @@ X_test = data['X_test']
 y_test = data['y_test']
 
 
-
 ## Q1a
 #print(np.round(np.mean(y_train)) == 0)
 
@@ -185,8 +184,25 @@ for kk in range(K):
     Ws[:-1,kk] = w_fit_temp
     Ws[-1,kk] = b_fitG_temp
 
+#bias X's for sigmoid
 X_bias_train = phi_linear(X_train)
 X_bias_val = phi_linear(X_val)
 
+#Predict probabilities using sigmoid
 Pred_train = sigmoid(np.matmul(X_bias_train,Ws))
 Pred_val = sigmoid(np.matmul(X_bias_val,Ws))
+
+#Fit reg. linear regression using predictions from logreg to y
+new_w_fit_train = fit_linreg(Pred_train, y_train, 10)
+new_w_fit_val = fit_linreg(Pred_val, y_val, 10)
+
+#Calculate RMSE's
+y_pred_train = np.dot(phi_linear(Pred_train),new_w_fit_train)
+y_pred_val = np.dot(phi_linear(Pred_val),new_w_fit_val)
+
+print('RMSE for reg. linear regression on logreg predictions on train set: ')
+print(rmse_lstsq(y_pred_train, y_train))
+print('RMSE for reg. linear regression on logreg predictions on val set: ')
+print(rmse_lstsq(y_pred_val, y_val))
+
+
