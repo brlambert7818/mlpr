@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ### Q1
-
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
 y_train = data['y_train']
@@ -12,7 +12,7 @@ X_val = data['X_val']
 y_val = data['y_val']
 X_test = data['X_test']
 y_test = data['y_test']
-# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+
 
 
 ## Q1a
@@ -162,7 +162,7 @@ X_val_aug = aug_fn(X_val)
 w_fit = fit_linreg(X_train_aug, y_train, 10)
 y_pred_train = np.dot(phi_linear(X_train_aug), w_fit)
 y_pred_val = np.dot(phi_linear(X_val_aug), w_fit)
-print('full feature linreg rmse:')
+print('full feature(aug) linreg rmse:')
 print(rmse_lstsq(y_pred_train, y_train))
 print(rmse_lstsq(y_pred_val, y_val))
 
@@ -173,11 +173,11 @@ mx = np.max(y_train)
 mn = np.min(y_train)
 hh = (mx-mn)/(K+1)
 thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True)
-Ws= np.zeros((data['X_train'].shape[1]+1, K))
+Ws= np.zeros((X_train.shape[1]+1, K))
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
-    labels = data['y_train'] > thresholds[kk] # labels for train set
+    labels = y_train > thresholds[kk] # labels for train set
 
     # fit log reg for each class(this or other)
     w_fit_temp, b_fitG_temp = fit_logreg_gradopt(X_train, labels, 10)
@@ -185,8 +185,8 @@ for kk in range(K):
     Ws[:-1,kk] = w_fit_temp
     Ws[-1,kk] = b_fitG_temp
 
-X_bias_train = phi_linear(data['X_train'])
-X_bias_val = phi_linear(data['X_val'])
+X_bias_train = phi_linear(X_train)
+X_bias_val = phi_linear(X_val)
 
 Pred_train = sigmoid(np.matmul(X_bias_train,Ws))
 Pred_val = sigmoid(np.matmul(X_bias_val,Ws))
