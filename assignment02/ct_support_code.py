@@ -142,14 +142,12 @@ def fit_linreg_gradopt(X, yy, alpha):
     ww, bb = minimize_list(linreg_cost, init, args)
     return ww, bb
 
-def fit_logreg_gradopt(X, yy, alpha):
+def fit_logreg_gradopt(X, yy, alpha, init):
     """ 
     Fit logistic regression using gradient descent optimiser
     """
     D = X.shape[1]
     args = (X, yy, alpha)
-#    init = (np.zeros(D), np.array(0)) #start with zeros
-    init = (np.random.randn(D),np.random.randn(1)) #start with random weights
     ww, bb = minimize_list(logreg_cost, init, args)
     return ww,bb
     
@@ -214,7 +212,18 @@ def logreg_cost(params, X, yy, alpha):
     ww_bar = np.dot(X.T, yy*aa_bar) + 2*alpha*ww
 
     return E, (ww_bar, bb_bar)
-
+    
+    
+def fit_nn_gradopt(X, yy, alpha, init):
+    """ 
+    Fit neural network using gradient descent optimiser
+    """
+    K = 10
+    D = X.shape[1]
+    args = (X, yy, alpha)
+    ww, bb, V, bk = minimize_list(nn_cost, init, args)
+    
+    return ww, bb, V, bk    
 
 def nn_cost(params, X, yy=None, alpha=None):
     """NN_COST simple neural network cost function and gradients, or predictions

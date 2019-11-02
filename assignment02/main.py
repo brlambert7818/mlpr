@@ -176,10 +176,13 @@ Ws= np.zeros((X_train.shape[1]+1, K))
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
+    np.random.seed(1)
     labels = y_train > thresholds[kk] # labels for train set
 
     # fit log reg for each class(this or other)
-    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(X_train, labels, 10)
+    init = (np.zeros(D), np.array(0)) #start with zeros
+#    init = (np.random.randn(D),np.random.randn(1)) #start with random weights
+    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(X_train, labels, 10, init)
 
     Ws[:-1,kk] = w_fit_temp
     Ws[-1,kk] = b_fitG_temp
@@ -193,16 +196,61 @@ Pred_train = sigmoid(np.matmul(X_bias_train,Ws))
 Pred_val = sigmoid(np.matmul(X_bias_val,Ws))
 
 #Fit reg. linear regression using predictions from logreg to y
-new_w_fit_train = fit_linreg(Pred_train, y_train, 10)
-new_w_fit_val = fit_linreg(Pred_val, y_val, 10)
+new_w_fit = fit_linreg(Pred_train, y_train, 10)
 
 #Calculate RMSE's
-y_pred_train = np.dot(phi_linear(Pred_train),new_w_fit_train)
-y_pred_val = np.dot(phi_linear(Pred_val),new_w_fit_val)
+y_pred_train = np.dot(phi_linear(Pred_train),new_w_fit)
+y_pred_val = np.dot(phi_linear(Pred_val),new_w_fit)
 
 print('RMSE for reg. linear regression on logreg predictions on train set: ')
 print(rmse_lstsq(y_pred_train, y_train))
 print('RMSE for reg. linear regression on logreg predictions on val set: ')
 print(rmse_lstsq(y_pred_val, y_val))
+
+
+### Q5
+scale_rand = 0.1/np.sqrt(K)
+init_ww = scale_rand*np.random.randn(K)
+init_bb = 0.1*np.random.randn(1)
+init_V = scale_rand*np.random.randn(K,D)
+init_bk = scale_rand*np.random.randn(K)
+init = (init_ww, init_bb, init_V, init_bk)
+
+ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt(X_train, y_train, 10, init)
+
+a_train = np.dot(X_train, V_nn.T)+bk_nn
+P_train = sigmoid(a_train)
+y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+print('RMSE for nn on train set: ')
+print(rmse_grad(y_pred_train, y_train))
+
+a_val = np.dot(X_val, V_nn.T)+bk_nn
+P_val = sigmoid(a_val)
+y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+print('RMSE for nn on val set: ')
+print(rmse_grad(y_pred_val, y_val))
+
+
+## Q5 B
+init_ww_B = new_w_fit[:-1,-1]
+init_bb_B = new_w_fit[-1,:]
+init_V_B = Ws[:-1,:].T
+init_bk_B = Ws[-1,:]
+init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B  = fit_nn_gradopt(X_train, y_train, 10, init_B)
+
+a_train = np.dot(X_train, V_nn_B.T)+bk_nn_B
+P_train = sigmoid(a_train)
+y_pred_train = np.dot(P_train,ww_nn_B) + bb_nn_B
+print('RMSE for nn on train set: ')
+print(rmse_grad(y_pred_train, y_train))
+
+a_val = np.dot(X_val, V_nn_B.T)+bk_nn_B
+P_val = sigmoid(a_val)
+y_pred_val = np.dot(P_val,ww_nn_B) + bb_nn_B
+print('RMSE for nn on val set: ')
+print(rmse_grad(y_pred_val, y_val))
+
 
 
