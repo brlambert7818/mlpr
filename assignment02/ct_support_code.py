@@ -9,30 +9,85 @@ from scipy.optimize import minimize
 
 
 def phi_linear(xin):
+    """ Adds a bias term to the input matrix
+
+        Inputs:
+            xin  N,D matrix of X values
+
+        Outputs:
+            N,(D+1) matrix of of X values with a bias column appended to the right
+    """
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
 
-def sigmoid(a): return 1 / (1 + np.exp(-a))
+def sigmoid(a):
+    """ Returns element-by-element logistic sigmoid of the input
+
+        Inputs:
+            a  N,D matrix to take the sigmoid of
+
+        Outputs:
+            N,D matrix of input values mapped to range [0,1] using logistic sigmoid
+    """
+    return 1 / (1 + np.exp(-a))
 
 
 def fit_linreg(X, yy, alpha):
+    """
+    fit a regularized linear regression model with np.linalg.lstsq(). Regularize using
+    a data augmentation approach rather than numerical
+
+         w_fit = fit_linreg(X, yy, alpha)
+
+     Inputs:
+             X N,D design matrix of input features
+            yy N,  real-valued targets
+         alpha     scalar regularization constant
+
+     Outputs:
+            w_fit D+1,  fitted weights and bias
+    """
+
     X_bias = phi_linear(X)
     K = X_bias.shape[1]
     y_reg = np.concatenate([yy[:, np.newaxis], np.zeros((K, 1))])
-    alpha_matrix = np.sqrt(alpha) * np.identity(K)
 
+    # add regularization using data augmentation approach
+    alpha_matrix = np.sqrt(alpha) * np.identity(K)
     X_reg = np.concatenate([X_bias, alpha_matrix])
     # remove the regularization of bias
     X_reg[-1, -1] = 0
+
+    # find fitted weights
     w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
 
 
 def rmse_lstsq(y_hat, y):
+    """ Returns root mean square error of predicted values that accounts for dimensionlity
+    differences in np.linalg.lstsq() optimization
+
+        Inputs:
+            y_hat  N, vector of predicted values
+                y  N, vector of actual values
+
+        Outputs:
+           float RMSE value
+    """
     return (np.square(np.subtract(y[:, np.newaxis], y_hat)).mean())**0.5
 
 
 def rmse_grad(y_hat, y):
+    """ Returns root mean square error of predicted values that accounts for dimensionality
+    differences in gradient-based optimization
+
+        Inputs:
+            y_hat  N, vector of predicted values
+                y  N, vector of actual values
+
+        Outputs:
+           float RMSE value
+    """
     return (np.square(np.subtract(y, y_hat)).mean())**0.5
 
 
@@ -45,6 +100,7 @@ def params_unwrap(param_vec, shapes, sizes):
         args.append(param_vec[pos:pos+sz].reshape(shapes[i]))
         pos += sz
     return args
+
 
 def params_wrap(param_list):
     """Helper routine for minimize_list"""
@@ -59,6 +115,7 @@ def params_wrap(param_list):
         pos += sz
     unwrap = lambda pvec: params_unwrap(pvec, shapes, sizes)
     return param_vec, unwrap
+
 
 def minimize_list(cost, init_list, args):
     """Optimize a list of arrays (wrapper of scipy.optimize.minimize)
@@ -116,6 +173,7 @@ def linreg_cost(params, X, yy, alpha):
 
     return E, [ww_bar, bb_bar]
 
+
 def fit_linreg_gradopt(X, yy, alpha):
     """
     fit a regularized linear regression model with gradient opt
@@ -142,14 +200,33 @@ def fit_linreg_gradopt(X, yy, alpha):
     ww, bb = minimize_list(linreg_cost, init, args)
     return ww, bb
 
+
 def fit_logreg_gradopt(X, yy, alpha, init):
-    """ 
-    Fit logistic regression using gradient descent optimiser
     """
-    D = X.shape[1]
+        Fit logistic regression using gradient descent optimizer
+
+             ww, bb = fit_logreg_gradopt(X, yy, alpha init)
+
+         Find weights and bias by using a gradient-based optimizer for logistic regression
+         (minimize_list) to improve the regularized least squares cost:
+
+         Inputs:
+                 X N,D design matrix of input features
+                yy N,  real-valued targets
+             alpha     scalar regularization constant
+              init (ww, bb), where:
+                    --------------------------------
+                        ww K,  initial weights
+                        bb     initial bias
+                    --------------------------------
+
+         Outputs:
+                ww D,  fitted weights
+                bb     scalar fitted bias
+        """
     args = (X, yy, alpha)
     ww, bb = minimize_list(logreg_cost, init, args)
-    return ww,bb
+    return ww, bb
     
 
 def random_proj(D, K=None, seed=0):
@@ -177,8 +254,7 @@ def random_proj(D, K=None, seed=0):
     return R
 
 
-def aug_fn(X): 
-    return np.concatenate([X, X == 0, X < 0], axis=1)
+def aug_fn(X): return np.concatenate([X, X == 0, X < 0], axis=1)
 
 
 def logreg_cost(params, X, yy, alpha):
@@ -215,15 +291,38 @@ def logreg_cost(params, X, yy, alpha):
     
     
 def fit_nn_gradopt(X, yy, alpha, init):
-    """ 
-    Fit neural network using gradient descent optimiser
     """
-    K = 10
-    D = X.shape[1]
+            Fit neural network with a sigmoidal hidden units and a linear output
+            using gradient descent optimizer
+
+                 ww, bb, V, bk = fit_nn_gradopt(X, yy, alpha, init)
+
+             Find weights and bias by using a gradient-based optimizer
+             (minimize_list) to improve the regularized least squares cost:
+
+             Inputs:
+                     X N,D design matrix of input features
+                    yy N,  real-valued targets
+                 alpha     scalar regularization constant
+                params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+
+             Outputs:
+                    ww K,  fitted hidden-output weights
+                    bb     fitted scalar output bias
+                    V K,D  fitted hidden-input weights
+                    bk K,  fitted hidden biases
+            """
     args = (X, yy, alpha)
     ww, bb, V, bk = minimize_list(nn_cost, init, args)
     
     return ww, bb, V, bk    
+
 
 def nn_cost(params, X, yy=None, alpha=None):
     """NN_COST simple neural network cost function and gradients, or predictions
