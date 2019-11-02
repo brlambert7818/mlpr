@@ -1,12 +1,12 @@
-from ct_support_code import * #assignment02.ct_support_code
+from assignment02.ct_support_code import *
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
 
 ### Q1
 
-#data = loadmat('ct_data.mat', squeeze_me=True)
-data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
 
 
 ## Q1a
@@ -62,18 +62,22 @@ for d in data_names:
 
 # fit model with lstsq using fit_linreg()
 w_fit = fit_linreg(data['X_train'], data['y_train'], 10)
+y_pred_train = np.dot(phi_linear(data['X_train']), w_fit)
+y_pred_val = np.dot(phi_linear(data['X_val']), w_fit)
 print('full feature linreg rmse:')
-print(rmse_lstsq(w_fit, data['X_train'], data['y_train']))
-print(rmse_lstsq(w_fit, data['X_val'], data['y_val']))
+print(rmse_lstsq(y_pred_train, data['y_train']))
+print(rmse_lstsq(y_pred_val, data['y_val']))
 print('')
 
  # fit model with gradient approach using fit_linreg_gradopt()
 w_fitG, b_fitG = fit_linreg_gradopt(data['X_train'], data['y_train'], 10)
+y_pred_train = np.add(np.dot(data['X_train'], w_fitG), b_fitG)
+y_pred_val = np.add(np.dot(data['X_val'], w_fitG), b_fitG)
 print('full feature gradopt rmse:')
-print(rmse_grad(w_fitG, b_fitG, data['X_train'], data['y_train']))
-print(rmse_grad(w_fitG, b_fitG, data['X_val'], data['y_val']))
+print(rmse_grad(y_pred_train, data['y_train']))
+print(rmse_grad(y_pred_val, data['y_val']))
 print('')
- 
+
 # Yes, the results are the same, as the gradient descent optimizer approaches the LS-solution.
 
 
@@ -88,9 +92,11 @@ X_train_reduc10 = np.matmul(data['X_train'], R_10)
 X_val_reduc10 = np.matmul(data['X_val'], R_10)
 
 w_fit_reduc10 = fit_linreg(X_train_reduc10, data['y_train'], 10)
+y_pred_train = np.dot(phi_linear(X_train_reduc10), w_fit_reduc10)
+y_pred_val = np.dot(phi_linear(X_val_reduc10), w_fit_reduc10)
 print('10 feature rmse:')
-print(rmse_lstsq(w_fit_reduc10, X_train_reduc10, data['y_train']))
-print(rmse_lstsq(w_fit_reduc10, X_val_reduc10, data['y_val']))
+print(rmse_lstsq(y_pred_train, data['y_train']))
+print(rmse_lstsq(y_pred_val, data['y_val']))
 print('')
 
 # k = 100
@@ -99,9 +105,11 @@ X_train_reduc100 = np.matmul(data['X_train'], R_100)
 X_val_reduc100 = np.matmul(data['X_val'], R_100)
 
 w_fit_reduc100 = fit_linreg(X_train_reduc100, data['y_train'], 100)
+y_pred_train = np.dot(phi_linear(X_train_reduc100), w_fit_reduc100)
+y_pred_val = np.dot(phi_linear(X_val_reduc100), w_fit_reduc100)
 print('100 feature rmse:')
-print(rmse_lstsq(w_fit_reduc100, X_train_reduc100, data['y_train']))
-print(rmse_lstsq(w_fit_reduc100, X_val_reduc100, data['y_val']))
+print(rmse_lstsq(y_pred_train, data['y_train']))
+print(rmse_lstsq(y_pred_val, data['y_val']))
 
 # Q3b
 
@@ -120,7 +128,7 @@ for i in range(0,6):
 plt.show()
 f1.set_size_inches(12, 7)
 f1.savefig('3b_hist.pdf')
-    
+
 
 no_of_val_train = data['X_train'].shape[0]*data['X_train'].shape[1] #number of all values in X_train
 # X-train values = -0.25
@@ -135,7 +143,7 @@ print('Fraction of values=-0.25: ' + str(frac_25))
 count_0 = 0
 for row in data['X_train']:
     count_0 += (row == 0).sum()
-    
+
 frac_0 = count_0/(no_of_val_train)
 print('Fraction of values=0: ' + str(frac_0))
 
@@ -146,50 +154,48 @@ X_val_aug = aug_fn(data['X_val'])
 
 # report rmse for augmented training and validation sets
 w_fit = fit_linreg(X_train_aug, data['y_train'], 10)
+y_pred_train = np.dot(phi_linear(X_train_aug), w_fit)
+y_pred_val = np.dot(phi_linear(X_val_aug), w_fit)
 print('full feature linreg rmse:')
-print(rmse_lstsq(w_fit, X_train_aug, data['y_train']))
-print(rmse_lstsq(w_fit, X_val_aug, data['y_val']))
+print(rmse_lstsq(y_pred_train, data['y_train']))
+print(rmse_lstsq(y_pred_val, data['y_val']))
 
 
 ### Q4
-K = 10 # number of thresholded classification problems to fit
+K = 10  # number of thresholded classification problems to fit
 mx = np.max(data['y_train'])
 mn = np.min(data['y_train'])
-hh = (mx-mn)/(K+1) 
-thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True) 
-Ws=[]
-Bs=[]
-Ws2= np.zeros((data['X_train'].shape[1]+1,K)).shape
-Pred_train=np.zeros((data['y_train'].shape[0],K))
-Pred_val=np.zeros((data['y_val'].shape[0],K))
-RMSE_train=np.zeros((K))
-RMSE_val = np.zeros((K))
+hh = (mx-mn)/(K+1)
+thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True)
+Ws = []
+Bs = []
+Pred_train = np.zeros((data['y_train'].shape[0], K))
+Pred_val = np.zeros((data['y_val'].shape[0], K))
+RMSE_train = np.zeros(K)
+RMSE_val = np.zeros(K)
 
-#Fit logistic regression with gradient descent optimiser
+# Fit logistic regression with gradient descent optimiser
 for kk in range(K):
-    labels = data['y_train'] > thresholds[kk] #labels for train set
-    labels_val = data['y_val'] > thresholds[kk] #labels for val set
-    
-    #fit log reg for each class(this or other)
-    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(data['X_train'], labels, 10) 
-    
-    #Calculate RMSE on train set
-    aa_train = np.dot(w_fit_temp[np.newaxis,:],data['X_train'].T).T+b_fitG_temp
-    sigma_train = 1/(1 + np.exp(-aa_train))
-    Pred_train[:,kk]=sigma_train[:,-1]
-    RMSE_train[kk] = (np.square(sigma_train-(labels*1)[:,np.newaxis]).mean())**0.5
-    
-    #Calculate RMSE on val set
-    aa_val = np.dot(w_fit_temp[np.newaxis,:],data['X_val'].T).T+b_fitG_temp
-    sigma_val = 1/(1 + np.exp(-aa_val))
-    Pred_val[:,kk]=sigma_val[:,-1]
-    RMSE_val[kk] = (np.square(sigma_val-(labels_val*1)[:,np.newaxis]).mean())**0.5
-    
-    #Keep weights and b's
+    labels = data['y_train'] > thresholds[kk] # labels for train set
+    labels_val = data['y_val'] > thresholds[kk] # labels for val set
+
+    # fit log reg for each class(this or other)
+    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(data['X_train'], labels, 10)
+
+    # Calculate RMSE on train set
+    aa_train = np.dot(w_fit_temp[np.newaxis, :], data['X_train'].T).T + b_fitG_temp
+    sigma_train = sigmoid(aa_train)
+    Pred_train[:, kk] = sigma_train[:, -1]
+    # RMSE_train[kk] = (np.square(sigma_train-(labels*1)[:, np.newaxis]).mean())**0.5
+    RMSE_train[kk] = rmse_grad(sigma_train, labels*1[:, np.newaxis])
+
+    # Calculate RMSE on val set
+    aa_val = np.dot(w_fit_temp[np.newaxis, :], data['X_val'].T).T + b_fitG_temp
+    sigma_val = sigmoid(aa_val)
+    Pred_val[:, kk] = sigma_val[:, -1]
+    # RMSE_val[kk] = (np.square(sigma_val-(labels_val*1)[:, np.newaxis]).mean())**0.5
+    RMSE_val[kk] = rmse_grad(sigma_val, labels_val*1[:, np.newaxis])
+
+    # Keep weights and b's
     Ws.append(w_fit_temp)
     Bs.append(b_fitG_temp)
-
-    
-
-
-
