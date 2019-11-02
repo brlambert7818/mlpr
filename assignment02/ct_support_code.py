@@ -140,11 +140,10 @@ def fit_linreg_gradopt(X, yy, alpha):
     ww, bb = minimize_list(linreg_cost, init, args)
     return ww, bb
 
-# Fit logistic regression using gradient descent optimiser
-    """ 
-    EDIT docstring for fitting 
-    """
 def fit_logreg_gradopt(X, yy, alpha):
+    """ 
+    Fit logistic regression using gradient descent optimiser
+    """
     D = X.shape[1]
     args = (X, yy, alpha)
 #    init = (np.zeros(D), np.array(0)) #start with zeros

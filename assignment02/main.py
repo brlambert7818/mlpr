@@ -159,6 +159,7 @@ hh = (mx-mn)/(K+1)
 thresholds = np.linspace(mn+hh, mx-hh, num=K, endpoint=True) 
 Ws=[]
 Bs=[]
+Ws2= np.zeros((data['X_train'].shape[1]+1,K)).shape
 Pred_train=np.zeros((data['y_train'].shape[0],K))
 Pred_val=np.zeros((data['y_val'].shape[0],K))
 RMSE_train=np.zeros((K))
