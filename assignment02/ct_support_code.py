@@ -20,18 +20,6 @@ def phi_linear(xin):
     return np.concatenate([xin, np.ones((xin.shape[0], 1))], axis=1)  # (N,D+1)
 
 
-def sigmoid(a):
-    """ Returns element-by-element logistic sigmoid of the input
-
-        Inputs:
-            a  N,D matrix to take the sigmoid of
-
-        Outputs:
-            N,D matrix of input values mapped to range [0,1] using logistic sigmoid
-    """
-    return 1 / (1 + np.exp(-a))
-
-
 def fit_linreg(X, yy, alpha):
     """
     fit a regularized linear regression model with np.linalg.lstsq(). Regularize using
@@ -61,6 +49,18 @@ def fit_linreg(X, yy, alpha):
     # find fitted weights
     w_fit = np.linalg.lstsq(X_reg, y_reg, rcond=None)[0]
     return w_fit
+
+
+def sigmoid(a):
+    """ Returns element-by-element logistic sigmoid of the input
+
+        Inputs:
+            a  N,D matrix to take the sigmoid of
+
+        Outputs:
+            N,D matrix of input values mapped to range [0,1] using logistic sigmoid
+    """
+    return 1 / (1 + np.exp(-a))
 
 
 def rmse_lstsq(y_hat, y):

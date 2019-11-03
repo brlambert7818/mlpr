@@ -105,6 +105,7 @@ y_test = data['y_test']
 w_fit = fit_linreg(X_train, y_train, 10)
 y_pred_train = np.dot(phi_linear(X_train), w_fit)
 y_pred_val = np.dot(phi_linear(X_val), w_fit)
+
 print('full feature linreg rmse:')
 print(rmse_lstsq(y_pred_train, y_train))
 print(rmse_lstsq(y_pred_val, y_val))
@@ -114,6 +115,7 @@ print('')
 w_fitG, b_fitG = fit_linreg_gradopt(X_train, y_train, 10)
 y_pred_train = np.add(np.dot(X_train, w_fitG), b_fitG)
 y_pred_val = np.add(np.dot(X_val, w_fitG), b_fitG)
+
 print('full feature gradopt rmse:')
 print(rmse_grad(y_pred_train, y_train))
 print(rmse_grad(y_pred_val, y_val))
