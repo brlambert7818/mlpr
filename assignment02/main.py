@@ -1,4 +1,4 @@
-from assignment02.ct_support_code import *  # assignment02.
+from ct_support_code import *  # assignment02.
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +32,11 @@ print('Standard error of 5785 positions in y_val: ' + str(se_y_val))
 print('Mean of the first 5785 training positions in y_train: ' + str(mu_y_train_5785))
 print('Standard error of the first 5785 training positions in y_train: ' + str(se_y_train_5785))
 
+muS=np.zeros(5)
+seS=np.zeros(5)
+for i in range(5):
+    muS[i] = np.mean(y_train[0+5785*i:5785*(i+1)])
+    seS[i] = np.std(y_train[0+5785*i:5785*(i+1)]) / np.sqrt(len(y_train[0+5785*i:5785*(i+1)]))
 
 # compare mean and SE between y_val and y_train
 f1 = plt.gcf()
@@ -39,6 +44,7 @@ plt.plot(0.5, mu_y_train_5785, 'r.', markersize=15, label='y_train[:5785] mean')
 plt.plot(1.5, mu_y_val, 'g.', markersize=15, label='y_val mean')
 plt.errorbar(np.array([0.5,1.5]), [mu_y_train_5785, mu_y_val], yerr=[se_y_train_5785, se_y_val],
              fmt='none', elinewidth=3, capsize=6,ecolor='k', label='error bars')
+#plt.plot([0, 2],[0, 0])
 plt.legend()
 plt.xlim(0,2)
 plt.ylim()
@@ -51,7 +57,7 @@ plt.show()
 ## Q1b
 
 # find input features with constant values
-X_train_T = X_train.T
+X_train_T = data['X_train'].T
 n_features_start = len(X_train_T)
 const_cols = []
 i = 0
@@ -64,15 +70,28 @@ for col in X_train_T:
 data_names = ['X_train', 'X_val', 'X_test']
 for d in data_names:
     data[d] = np.delete(data[d], const_cols, axis=1)
+    
+print('Features with constant values: ' + str(const_cols))
 
 # find duplicate input features
-n_features = len(X_train.T)
-unique, uniq_index = np.unique(X_train, axis=1, return_index=True)
-duplicate_indices = list(set(range(n_features)) - set(uniq_index))
+X_train_T = data['X_train'].T
+n_features = len(X_train_T)
+unique, uniq_index = np.unique(data['X_train'], axis=1, return_index=True)
+duplicate_indices = np.sort(list(set(range(n_features)) - set(uniq_index)))
 
 # remove duplicate input features
 for d in data_names:
     data[d] = np.delete(data[d], duplicate_indices, axis=1)
+
+print('Duplicate features: ' + str(duplicate_indices))
+
+#reassign arrays
+X_train = data['X_train']
+y_train = data['y_train']
+X_val = data['X_val']
+y_val = data['y_val']
+X_test = data['X_test']
+y_test = data['y_test']
 
 # check dimensions
 # print('# final features = # original features - # constant features - # duplicate features')
