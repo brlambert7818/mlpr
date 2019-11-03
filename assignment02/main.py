@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 ### Q1
 
-# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
-data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+#data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
 y_train = data['y_train']
@@ -18,35 +18,34 @@ y_test = data['y_test']
 
 ## Q1a
 
+mu_y_train = np.mean(y_train) # y_train mean all positions
+mu_y_val = np.mean(y_val) # y_val mean all positions
+se_y_val = np.std(y_val) / np.sqrt(len(y_val)) #y_val se all positions
+
 # y_train mean and SE for the first 5,785 positions
 mu_y_train_5785 = np.mean(y_train[:5785])
 se_y_train_5785 = np.std(y_train[:5785]) / np.sqrt(len(y_train[:5785]))
 
-# y_val mean and SE
-mu_y_val = np.mean(y_val)
-se_y_val = np.std(y_val) / np.sqrt(len(y_val))
-
-# y_train mean and SE
-mu_y_train = np.mean(y_train)
-se_y_train = np.std(y_train) / np.sqrt(len(y_train))
-
 print('Mean of the training positions in y_train: ' + str(mu_y_train))
 print('Mean of 5785 positions in y_val: ' + str(mu_y_val))
-
+print('Standard error of 5785 positions in y_val: ' + str(se_y_val))
+print('Mean of the first 5785 training positions in y_train: ' + str(mu_y_train_5785))
+print('Standard error of the first 5785 training positions in y_train: ' + str(se_y_train_5785))
 
 
 # compare mean and SE between y_val and y_train
-plt.close()
-plt.errorbar(np.array([0.5,1.5]), [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
-             fmt='.k')#, elinewidth=4, capsize=6)
-plt.plot('y_train[:5785]', mu_y_train_5785, 'r.', markersize=12)
-plt.plot('y_val', mu_y_val, 'r.', markersize=12)
-plt.errorbar(['y_train[:5785]', 'y_val'], [mu_y_train_5785, mu_y_val],
-             [se_y_train_5785, se_y_val], fmt='none')
-             
+f1 = plt.gcf()
+plt.plot(0.5, mu_y_train_5785, 'r.', markersize=15, label='y_train[:5785] mean')
+plt.plot(1.5, mu_y_val, 'g.', markersize=15, label='y_val mean')
+plt.errorbar(np.array([0.5,1.5]), [mu_y_train_5785, mu_y_val], yerr=[se_y_train_5785, se_y_val],
+             fmt='none', elinewidth=3, capsize=6,ecolor='k', label='error bars')
+plt.legend()
 plt.xlim(0,2)
 plt.ylim()
-plt.xticks(np.array([0.5,1.5]), ['a','a'])
+plt.xticks(np.array([0.5,1.5]), ['y_train[:5785]','y_val'],fontsize=15)
+plt.ylabel('values', fontsize=15)
+#f1.set_size_inches(9, 6)
+#f1.savefig('1a_error_bar_plot.pdf')
 plt.show()
 
 ## Q1b
