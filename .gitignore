@@ -1,2 +1,6 @@
 *.mat
 .DS_Store
+assignment02/.floydexpt
+assignment02/.floydignore
+assignment02/floyd.yml
+assignment02/.floyddata

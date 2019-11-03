@@ -275,3 +275,67 @@ def nn_cost(params, X, yy=None, alpha=None):
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
+def logit(a):
+    return np.log(a/(1-a))
+
+def nn_cost_eps(params, X, yy=None, alpha=None, for_ep=None):
+    """NN_COST simple neural network cost function and gradients, or predictions
+
+           E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
+                    pred = nn_cost([ww, bb, V, bk], X)
+
+     Cost function E can be minimized with minimize_list
+
+     Inputs:
+             params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+                  X N,D input design matrix
+                 yy N,  regression targets
+              alpha     scalar regularization for weights
+
+     Outputs:
+                     E  sum of squares error
+            params_bar  gradients wrt params, same format as params
+     OR
+               pred N,  predictions if only params and X are given as inputs
+    """
+    # Unpack parameters from list
+    ww, bb, V, bk = params
+
+    # Forwards computation of cost
+    A = np.dot(X, V.T) + bk[None,:] # N,K
+    P = (1-sigmoid(for_ep))*1 / (1 + np.exp(-A)) + sigmoid(for_ep)/2 # N,K
+    F = np.dot(P, ww) + bb # N,
+    if yy is None:
+        # user wants prediction rather than training signal:
+        return F
+    res = F - yy # N,
+    E = np.dot(res, res) + alpha*(np.sum(V*V) + np.dot(ww,ww)) # 1x1
+
+    # Reverse computation of gradients
+    F_bar = 2*res # N,
+    ww_bar = np.dot(P.T, F_bar) + 2*alpha*ww # K,
+    bb_bar = np.sum(F_bar) # scalar
+    P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
+    A_bar = P_bar * ((P-sigmoid(for_ep)/2)*((1-sigmoid(for_ep)/2-P)/(1-sigmoid(for_ep)))) # N,
+    V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
+    bk_bar = np.sum(A_bar, 0)
+#    for_ep_bar = np.sum(P_bar * ( -sigmoid(for_ep)*(P-sigmoid(for_ep)/2) + sigmoid(for_ep)/2*(1-sigmoid(for_ep)) ))
+#    alpha_bar = np.sum(V*V) + np.dot(ww,ww)
+
+    return E, (ww_bar, bb_bar, V_bar, bk_bar)
+
+def fit_nn_gradopt_eps(X, yy, alpha, for_ep, init):
+    """ 
+    Fit neural network using gradient descent optimiser
+    """
+
+    args = (X, yy, alpha, for_ep)
+    ww, bb, V, bk = minimize_list(nn_cost_eps, init, args)
+    
+    return ww, bb, V, bk
