@@ -18,6 +18,10 @@ y_test = data['y_test']
 
 ## Q1a
 
+# y_train mean and SE for the first 5,785 positions
+mu_y_train_5785 = np.mean(y_train[:5785])
+se_y_train_5785 = np.std(y_train[:5785]) / np.sqrt(len(y_train[:5785]))
+
 # y_val mean and SE
 mu_y_val = np.mean(y_val)
 se_y_val = np.std(y_val) / np.sqrt(len(y_val))
@@ -35,6 +39,11 @@ print('Mean of 5785 positions in y_val: ' + str(mu_y_val))
 plt.close()
 plt.errorbar(np.array([0.5,1.5]), [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
              fmt='.k')#, elinewidth=4, capsize=6)
+plt.plot('y_train[:5785]', mu_y_train_5785, 'r.', markersize=12)
+plt.plot('y_val', mu_y_val, 'r.', markersize=12)
+plt.errorbar(['y_train[:5785]', 'y_val'], [mu_y_train_5785, mu_y_val],
+             [se_y_train_5785, se_y_val], fmt='none')
+             
 plt.xlim(0,2)
 plt.ylim()
 plt.xticks(np.array([0.5,1.5]), ['a','a'])

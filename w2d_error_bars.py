@@ -15,4 +15,5 @@ plt.plot('z', np.mean(z), 'r.', markersize=12)
 plt.errorbar(['x', 'z'], [np.mean(x), np.mean(z)],
              [sigma_hat_x / np.sqrt(N), sigma_hat_x / np.sqrt(N)],
              fmt='none')
+# plt.xlim(-1, 1.5)
 plt.show()
