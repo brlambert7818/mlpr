@@ -26,9 +26,18 @@ se_y_val = np.std(y_val) / np.sqrt(len(y_val))
 mu_y_train = np.mean(y_train)
 se_y_train = np.std(y_train) / np.sqrt(len(y_train))
 
+print('Mean of the training positions in y_train: ' + str(mu_y_train))
+print('Mean of 5785 positions in y_val: ' + str(mu_y_val))
+
+
+
 # compare mean and SE between y_val and y_train
-plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
-             fmt='.k')
+plt.close()
+plt.errorbar(np.array([0.5,1.5]), [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
+             fmt='.k')#, elinewidth=4, capsize=6)
+plt.xlim(0,2)
+plt.ylim()
+plt.xticks(np.array([0.5,1.5]), ['a','a'])
 plt.show()
 
 ## Q1b
