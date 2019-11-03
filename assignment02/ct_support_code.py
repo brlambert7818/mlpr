@@ -63,23 +63,8 @@ def sigmoid(a):
     return 1 / (1 + np.exp(-a))
 
 
-def rmse_lstsq(y_hat, y):
-    """ Returns root mean square error of predicted values that accounts for dimensionlity
-    differences in np.linalg.lstsq() optimization
-
-        Inputs:
-            y_hat  N, vector of predicted values
-                y  N, vector of actual values
-
-        Outputs:
-           float RMSE value
-    """
-    return (np.square(np.subtract(y[:, np.newaxis], y_hat)).mean())**0.5
-
-
-def rmse_grad(y_hat, y):
-    """ Returns root mean square error of predicted values that accounts for dimensionality
-    differences in gradient-based optimization
+def rmse(y_hat, y):
+    """ Returns root mean square error of predicted values
 
         Inputs:
             y_hat  N, vector of predicted values
@@ -89,6 +74,7 @@ def rmse_grad(y_hat, y):
            float RMSE value
     """
     return (np.square(np.subtract(y, y_hat)).mean())**0.5
+
 
 
 def params_unwrap(param_vec, shapes, sizes):
@@ -227,7 +213,7 @@ def fit_logreg_gradopt(X, yy, alpha, init):
     args = (X, yy, alpha)
     ww, bb = minimize_list(logreg_cost, init, args)
     return ww, bb
-    
+
 
 def random_proj(D, K=None, seed=0):
     """return random projection matrix
@@ -288,8 +274,8 @@ def logreg_cost(params, X, yy, alpha):
     ww_bar = np.dot(X.T, yy*aa_bar) + 2*alpha*ww
 
     return E, (ww_bar, bb_bar)
-    
-    
+
+
 def fit_nn_gradopt(X, yy, alpha, init):
     """
             Fit neural network with a sigmoidal hidden units and a linear output
@@ -320,8 +306,8 @@ def fit_nn_gradopt(X, yy, alpha, init):
             """
     args = (X, yy, alpha)
     ww, bb, V, bk = minimize_list(nn_cost, init, args)
-    
-    return ww, bb, V, bk    
+
+    return ww, bb, V, bk
 
 
 def nn_cost(params, X, yy=None, alpha=None):
@@ -373,4 +359,3 @@ def nn_cost(params, X, yy=None, alpha=None):
     bk_bar = np.sum(A_bar, 0)
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
-

@@ -1,4 +1,4 @@
-from ct_support_code import *  # assignment02.
+from assignment02.ct_support_code import *  # assignment02.
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 ### Q1
 
-data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
-#data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
 y_train = data['y_train']
@@ -70,7 +70,7 @@ for col in X_train_T:
 data_names = ['X_train', 'X_val', 'X_test']
 for d in data_names:
     data[d] = np.delete(data[d], const_cols, axis=1)
-    
+
 print('Features with constant values: ' + str(const_cols))
 
 # find duplicate input features
@@ -103,12 +103,11 @@ y_test = data['y_test']
 
 # fit model with lstsq using fit_linreg()
 w_fit = fit_linreg(X_train, y_train, 10)
-y_pred_train = np.dot(phi_linear(X_train), w_fit)
-y_pred_val = np.dot(phi_linear(X_val), w_fit)
-
+y_pred_train = np.dot(phi_linear(X_train), w_fit)[:, -1]
+y_pred_val = np.dot(phi_linear(X_val), w_fit)[:, -1]
 print('full feature linreg rmse:')
-print(rmse_lstsq(y_pred_train, y_train))
-print(rmse_lstsq(y_pred_val, y_val))
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
 print('')
 
 # fit model with gradient approach using fit_linreg_gradopt()
@@ -117,8 +116,8 @@ y_pred_train = np.add(np.dot(X_train, w_fitG), b_fitG)
 y_pred_val = np.add(np.dot(X_val, w_fitG), b_fitG)
 
 print('full feature gradopt rmse:')
-print(rmse_grad(y_pred_train, y_train))
-print(rmse_grad(y_pred_val, y_val))
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
 print('')
 
 # Yes, the results are the same, as the gradient descent optimizer approaches the LS-solution.
@@ -136,11 +135,11 @@ X_val_reduc10 = np.matmul(X_val, R_10)
 
 # fit linear regression model using k = 10 input dimensions
 w_fit_reduc10 = fit_linreg(X_train_reduc10, y_train, 10)
-y_pred_train = np.dot(phi_linear(X_train_reduc10), w_fit_reduc10)
-y_pred_val = np.dot(phi_linear(X_val_reduc10), w_fit_reduc10)
+y_pred_train = np.dot(phi_linear(X_train_reduc10), w_fit_reduc10)[:, -1]
+y_pred_val = np.dot(phi_linear(X_val_reduc10), w_fit_reduc10)[:, -1]
 print('10 feature rmse:')
-print(rmse_lstsq(y_pred_train, y_train))
-print(rmse_lstsq(y_pred_val, y_val))
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
 print('')
 
 # reduce X dimensions to k = 100
@@ -150,11 +149,11 @@ X_val_reduc100 = np.matmul(X_val, R_100)
 
 # fit linear regression model using k = 10 input dimensions
 w_fit_reduc100 = fit_linreg(X_train_reduc100, y_train, 100)
-y_pred_train = np.dot(phi_linear(X_train_reduc100), w_fit_reduc100)
-y_pred_val = np.dot(phi_linear(X_val_reduc100), w_fit_reduc100)
+y_pred_train = np.dot(phi_linear(X_train_reduc100), w_fit_reduc100)[:, -1]
+y_pred_val = np.dot(phi_linear(X_val_reduc100), w_fit_reduc100)[:, -1]
 print('100 feature rmse:')
-print(rmse_lstsq(y_pred_train, y_train))
-print(rmse_lstsq(y_pred_val, y_val))
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
 
 # Q3b
 
@@ -198,11 +197,11 @@ X_val_aug = aug_fn(X_val)
 
 # report rmse for augmented training and validation sets
 w_fit = fit_linreg(X_train_aug, y_train, 10)
-y_pred_train = np.dot(phi_linear(X_train_aug), w_fit)
-y_pred_val = np.dot(phi_linear(X_val_aug), w_fit)
+y_pred_train = np.dot(phi_linear(X_train_aug), w_fit)[:, -1]
+y_pred_val = np.dot(phi_linear(X_val_aug), w_fit)[:, -1]
 print('full feature(aug) linreg rmse:')
-print(rmse_lstsq(y_pred_train, y_train))
-print(rmse_lstsq(y_pred_val, y_val))
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
 
 
 ### Q4
@@ -240,13 +239,13 @@ Pred_val = sigmoid(np.matmul(X_bias_val, Ws))
 new_w_fit = fit_linreg(Pred_train, y_train, 10)
 
 # Calculate RMSE's
-y_pred_train = np.dot(phi_linear(Pred_train), new_w_fit)
-y_pred_val = np.dot(phi_linear(Pred_val), new_w_fit)
+y_pred_train = np.dot(phi_linear(Pred_train), new_w_fit)[:, -1]
+y_pred_val = np.dot(phi_linear(Pred_val), new_w_fit)[:, -1]
 
 print('RMSE for reg. linear regression on logreg predictions on train set: ')
-print(rmse_lstsq(y_pred_train, y_train))
+print(rmse(y_pred_train, y_train))
 print('RMSE for reg. linear regression on logreg predictions on val set: ')
-print(rmse_lstsq(y_pred_val, y_val))
+print(rmse(y_pred_val, y_val))
 
 ### Q5
 
@@ -266,14 +265,14 @@ a_train = np.dot(X_train, V_nn.T) + bk_nn
 P_train = sigmoid(a_train)
 y_pred_train = np.dot(P_train, ww_nn) + bb_nn
 print('RMSE for nn on train set: ')
-print(rmse_grad(y_pred_train, y_train))
+print(rmse(y_pred_train, y_train))
 
 # calculate nn rmse on validation set
 a_val = np.dot(X_val, V_nn.T) + bk_nn
 P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn) + bb_nn
 print('RMSE for nn on val set: ')
-print(rmse_grad(y_pred_val, y_val))
+print(rmse(y_pred_val, y_val))
 
 ## Q5 B
 
@@ -292,11 +291,11 @@ a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
 P_train = sigmoid(a_train)
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
 print('RMSE for nn on train set: ')
-print(rmse_grad(y_pred_train, y_train))
+print(rmse(y_pred_train, y_train))
 
 # calculate nn rmse on validation set
 a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
 P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
-print(rmse_grad(y_pred_val, y_val))
+print(rmse(y_pred_val, y_val))
