@@ -63,23 +63,8 @@ def fit_linreg(X, yy, alpha):
     return w_fit
 
 
-def rmse_lstsq(y_hat, y):
-    """ Returns root mean square error of predicted values that accounts for dimensionlity
-    differences in np.linalg.lstsq() optimization
-
-        Inputs:
-            y_hat  N, vector of predicted values
-                y  N, vector of actual values
-
-        Outputs:
-           float RMSE value
-    """
-    return (np.square(np.subtract(y[:, np.newaxis], y_hat)).mean())**0.5
-
-
-def rmse_grad(y_hat, y):
-    """ Returns root mean square error of predicted values that accounts for dimensionality
-    differences in gradient-based optimization
+def rmse(y_hat, y):
+    """ Returns root mean square error of predicted values
 
         Inputs:
             y_hat  N, vector of predicted values
