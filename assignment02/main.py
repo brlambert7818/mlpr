@@ -18,17 +18,19 @@ y_test = data['y_test']
 
 ## Q1a
 
+# y_train mean and SE for the first 5,785 positions
+mu_y_train_5785 = np.mean(y_train[:5785])
+se_y_train_5785 = np.std(y_train[:5785]) / np.sqrt(len(y_train[:5785]))
+
 # y_val mean and SE
 mu_y_val = np.mean(y_val)
 se_y_val = np.std(y_val) / np.sqrt(len(y_val))
 
-# y_train mean and SE
-mu_y_train = np.mean(y_train)
-se_y_train = np.std(y_train) / np.sqrt(len(y_train))
-
 # compare mean and SE between y_val and y_train
-plt.errorbar(['y_train', 'y_val'], [mu_y_train, mu_y_val], yerr=[se_y_train, se_y_val],
-             fmt='.k')
+plt.plot('y_train[:5785]', mu_y_train_5785, 'r.', markersize=12)
+plt.plot('y_val', mu_y_val, 'r.', markersize=12)
+plt.errorbar(['y_train[:5785]', 'y_val'], [mu_y_train_5785, mu_y_val],
+             [se_y_train_5785, se_y_val], fmt='none')
 plt.show()
 
 ## Q1b
