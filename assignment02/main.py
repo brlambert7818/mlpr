@@ -274,8 +274,9 @@ init_for_ep = np.abs(0.1*np.random.randn(1))
 init_alpha = np.abs(0.1*np.random.randn(1)+10)
 init = (init_ww, init_bb, init_V, init_bk)
 
-for_eps=np.concatenate([-np.logspace(-4,2,8,endpoint=True),np.logspace(-4,2,8,endpoint=True)])
-alphas = np.logspace(-2,2,16,endpoint=True)
+#for_eps=np.concatenate([-np.logspace(-0.52,-0.4,8,endpoint=True),np.logspace(-4,2,8,endpoint=True)])
+for_eps=np.logspace(-0.52,-0.4,10,endpoint=True)
+alphas = np.logspace(-1.3,-0.824,10,endpoint=True)
 
 params_pairs = np.zeros((len(for_eps)*len(alphas),2))
 RMSE_train = np.zeros(len(params_pairs))
