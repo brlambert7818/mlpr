@@ -234,7 +234,9 @@ mx = np.max(y_train)
 mn = np.min(y_train)
 hh = (mx - mn) / (K + 1)
 thresholds = np.linspace(mn + hh, mx - hh, num=K, endpoint=True)
-Ws = np.zeros((X_train.shape[1] + 1, K))
+
+#matrix for storing weights for each class. task
+Ws = np.zeros((X_train.shape[1] + 1, K)) 
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
@@ -243,9 +245,9 @@ for kk in range(K):
 
     # fit log reg for each class(this or other)
     init = (np.zeros(D), np.array(0))  # start with zeros
-    #    init = (np.random.randn(D),np.random.randn(1)) #start with random weights
     w_fit_temp, b_fitG_temp = fit_logreg_gradopt(X_train, labels, 10, init)
-
+    
+    # store vectors w with bias b
     Ws[:-1, kk] = w_fit_temp
     Ws[-1, kk] = b_fitG_temp
 
@@ -257,12 +259,15 @@ X_bias_val = phi_linear(X_val)
 Pred_train = sigmoid(np.matmul(X_bias_train, Ws))
 Pred_val = sigmoid(np.matmul(X_bias_val, Ws))
 
-# Fit reg. linear regression using predictions from logreg to y
+
+# Fit linear regression using predictions from logreg to y_train
 new_w_fit = fit_linreg(Pred_train, y_train, 10)
 
 # Calculate RMSE's
 y_pred_train = np.dot(phi_linear(Pred_train), new_w_fit)[:, -1]
 y_pred_val = np.dot(phi_linear(Pred_val), new_w_fit)[:, -1]
+rmse_train_logreg_lin = rmse(y_pred_train, y_train)
+rmse_val_logreg_lin = rmse(y_pred_val, y_val)
 
 print('RMSE for reg. linear regression on logreg predictions on train set: ')
 print(rmse(y_pred_train, y_train))
