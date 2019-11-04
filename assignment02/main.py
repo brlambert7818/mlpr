@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 
 ### Q1
 
-#data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
 #data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
-data = loadmat('/ct_data.mat', squeeze_me=True)
+#data = loadmat('data/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
 y_train = data['y_train']
@@ -326,3 +326,6 @@ P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
+
+
+
