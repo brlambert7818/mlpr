@@ -3,6 +3,7 @@ from ct_support_code import *
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 
 ### Q1
@@ -240,7 +241,7 @@ Ws = np.zeros((X_train.shape[1] + 1, K))
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
-    np.random.seed(1)
+#    np.random.seed(1)
     labels = y_train > thresholds[kk]  # labels for train set
 
     # fit log reg for each class(this or other)
@@ -275,7 +276,6 @@ print('RMSE for reg. linear regression on logreg predictions on val set: ')
 print(rmse(y_pred_val, y_val))
 
 ### Q5
-
 # create initial randomized parameters for nn
 scale_rand = 0.1 / np.sqrt(K)
 init_ww = scale_rand * np.random.randn(K)
@@ -300,7 +300,6 @@ P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn) + bb_nn
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
-
 ## Q5 B
 
 # create initial parameters for nn using fits from Q4

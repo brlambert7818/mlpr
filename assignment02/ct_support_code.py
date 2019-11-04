@@ -76,7 +76,6 @@ def rmse(y_hat, y):
     return (np.square(np.subtract(y, y_hat)).mean())**0.5
 
 
-
 def params_unwrap(param_vec, shapes, sizes):
     """Helper routine for minimize_list"""
     args = []
