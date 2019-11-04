@@ -328,4 +328,37 @@ print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
 
+### Q6
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+alphas = np.logspace(-2,2,10)
+for i in range(len(alphas)):
+    print(i)
+    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt(X_train, y_train, alphas[i], init)
+    a_train = np.dot(X_train, V_nn.T)+bk_nn
+    P_train = sigmoid(a_train)
+    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+    RMSE_train[i] = rmse_(y_pred_train, y_train)
+    
+    a_val = np.dot(X_val, V_nn.T)+bk_nn
+    P_val = sigmoid(a_val)
+    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+    RMSE_val[i] = rmse(y_pred_val, y_val)
+
+print('on train set:')
+print('rmse train: ')
+print(RMSE_train.min())
+print('params(ep, alpha) train: ')
+print(params_pairs[RMSE_train.argmin()])
+
+print('on val set:')
+print('rmse val: ')
+print(RMSE_val.min())
+print('params(ep, alpha) val: ')
+print(params_pairs[RMSE_val.argmin()])
+
 
