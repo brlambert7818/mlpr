@@ -429,8 +429,10 @@ def nn_cost2(params, X, yy=None, regs=None):
     # Forwards computation of cost
     A = np.dot(X, V.T) + bk[None,:] # N,K
 #    P = 1 / (1 + np.exp(-A)) # N,K
-    P = my_relu(A)
+#    P = my_relu(A)
 #    P = my_tanh(A) # N,K
+    p=0.01
+    P = my_lrelu(A,p)
     F = np.dot(P, ww) + bb # N,
     if yy is None:
         # user wants prediction rather than training signal:
@@ -444,8 +446,102 @@ def nn_cost2(params, X, yy=None, regs=None):
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
 #    A_bar = P_bar * P * (1 - P) # N,
-    A_bar = P_bar * d_my_relu(A)# N,
+#    A_bar = P_bar * d_my_relu(A)# N,
 #    A_bar = P_bar * (1 - P**2)# N,
+    A_bar = P_bar * d_my_lrelu(A,p)# N,
+    V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
+    bk_bar = np.sum(A_bar, 0)
+
+    return E, (ww_bar, bb_bar, V_bar, bk_bar)
+
+def fit_nn_gradopt3(X, yy, regs, init):
+    """
+            Fit neural network with a sigmoidal hidden units and a linear output
+            using gradient descent optimizer
+
+                 ww, bb, V, bk = fit_nn_gradopt(X, yy, alpha, init)
+
+             Find weights and bias by using a gradient-based optimizer
+             (minimize_list) to improve the regularized least squares cost:
+
+             Inputs:
+                     X N,D design matrix of input features
+                    yy N,  real-valued targets
+                 alpha     scalar regularization constant
+                params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+
+             Outputs:
+                    ww K,  fitted hidden-output weights
+                    bb     fitted scalar output bias
+                    V K,D  fitted hidden-input weights
+                    bk K,  fitted hidden biases
+            """
+    args = (X, yy, regs)
+    ww, bb, V, bk = minimize_list(nn_cost3, init, args)
+
+    return ww, bb, V, bk
+
+def nn_cost3(params, X, yy=None, regs=None):
+    """NN_COST simple neural network cost function and gradients, or predictions
+
+           E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
+                    pred = nn_cost([ww, bb, V, bk], X)
+
+     Cost function E can be minimized with minimize_list
+
+     Inputs:
+             params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+                  X N,D input design matrix
+                 yy N,  regression targets
+              alpha     scalar regularization for weights
+
+     Outputs:
+                     E  sum of squares error
+            params_bar  gradients wrt params, same format as params
+     OR
+               pred N,  predictions if only params and X are given as inputs
+    """
+    # Unpack parameters from list
+    ww, bb, V, bk = params
+    alpha, beta, p = regs
+    
+#    print(regs)
+#    print(alpha)
+#    print(beta)
+    # Forwards computation of cost
+    A = np.dot(X, V.T) + bk[None,:] # N,K
+#    P = 1 / (1 + np.exp(-A)) # N,K
+#    P = my_relu(A)
+#    P = my_tanh(A) # N,K
+    P = my_lrelu(A,p)
+    F = np.dot(P, ww) + bb # N,
+    if yy is None:
+        # user wants prediction rather than training signal:
+        return F
+    res = F - yy # N,
+    E = np.dot(res, res) + alpha*np.sum(V*V) + beta*np.dot(ww,ww) # 1x1
+
+    # Reverse computation of gradients
+    F_bar = 2*res # N,
+    ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
+    bb_bar = np.sum(F_bar) # scalar
+    P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
+#    A_bar = P_bar * P * (1 - P) # N,
+#    A_bar = P_bar * d_my_relu(A)# N,
+#    A_bar = P_bar * (1 - P**2)# N,
+    A_bar = P_bar * d_my_lrelu(A,p)# N,
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 
@@ -555,10 +651,14 @@ def nn_cost2(params, X, yy=None, regs=None):
 def my_tanh(x): return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
 
 def my_relu(x): return np.maximum(np.zeros(x.shape),x)
-#def my_lrelu(x): 
-#    x[x[:,:]<=0] = 0.01*x
 
+def my_lrelu(x,p): 
+    return np.maximum(x*p,x)
+    
 def d_my_relu(x): 
     return (x[:,:]>0)*1
+
+def d_my_lrelu(x,p):
+    return (x[:,:]>0)*1+(x[:,:]<=0)*p
 
 #>>>>>>> Stashed changes

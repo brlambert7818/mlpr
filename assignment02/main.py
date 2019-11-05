@@ -407,15 +407,15 @@ from ct_support_code import *
 
 
 # Q6
-
+p = 0.01
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
 init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-alphas = np.logspace(-2,2,6,endpoint=True)
-betas = np.logspace(-2,2,6,endpoint=True)
+alphas = np.logspace(-2,2,2,endpoint=True)
+betas = np.logspace(-2,2,2,endpoint=True)
 
 params_pairs = np.zeros((len(betas)*len(alphas),2))
 RMSE_train = np.zeros(len(params_pairs))
@@ -424,21 +424,24 @@ for i in range(len(alphas)):
     for j in range(len(betas)):
         params_pairs[j+i*len(alphas),0]=alphas[i]
         params_pairs[j+i*len(betas),1]=betas[j]
+
         
 for i in range(len(params_pairs)):
     print(i)
     ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, params_pairs[i,:], init_B)
     a_train = np.dot(X_train, V_nn.T)+bk_nn
 #    P_train = sigmoid(a_train)
-    P_train = my_relu(a_train)  
+#    P_train = my_relu(a_train)  
 #    P_train = my_tanh(a_train)      
+    P_train = my_lrelu(a_train,p)      
     y_pred_train = np.dot(P_train,ww_nn) + bb_nn
     RMSE_train[i] = rmse(y_pred_train, y_train)
     
     a_val = np.dot(X_val, V_nn.T)+bk_nn
 #    P_val = sigmoid(a_val)
-    P_val = my_relu(a_val)
+#    P_val = my_relu(a_val)
 #    P_val = my_tanh(a_val)
+    P_val = my_lrelu(a_val,p)
     y_pred_val = np.dot(P_val,ww_nn) + bb_nn
     RMSE_val[i] = rmse(y_pred_val, y_val)
 
@@ -464,13 +467,14 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 # fit neural network with fitted parameters from Q4
-ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, opt, init_B)
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, opt, init_B) #np.array([10,10])
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
 #    P_train = sigmoid(a_train)
-P_train = my_relu(a_train)  
-#    P_train = my_tanh(a_train)   
+#P_train = my_relu(a_train)  
+#P_train = my_tanh(a_train)   
+P_train = my_lrelu(a_train,p)  
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
@@ -478,19 +482,115 @@ print(rmse(y_pred_train, y_train))
 # calculate nn rmse on validation set
 a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
 #    P_val = sigmoid(a_val)
-P_val = my_relu(a_val)
-#    P_val = my_tanh(a_val)
+#P_val = my_relu(a_val)
+#P_val = my_tanh(a_val)
+P_val = my_lrelu(a_val,p)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
 # calculate nn rmse on test set
 a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
-#    P_test = sigmoid(a_test)
-P_test = my_relu(a_test)
-#    P_test = my_tanh(a_test)
+#P_test = sigmoid(a_test)
+#P_test = my_relu(a_test)
+#P_test = my_tanh(a_test)
+P_test = my_lrelu(a_test,p)
 y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_test, y_test))
 
 from ct_support_code import *
+
+
+
+
+# Triple params for prelu
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+alphas = np.logspace(-2,2,2,endpoint=True)
+betas = np.logspace(-2,2,2,endpoint=True)
+ps = np.logspace(-2,0,2,endpoint=True)
+
+params_triple = np.zeros((len(betas)*len(alphas)*len(ps),3))
+RMSE_train = np.zeros(len(params_triple))
+            
+params_triple = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+
+        
+for i in range(len(params_triple)):
+    print(i)
+    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt3(X_train, y_train, params_triple[i,:], init_B)
+    a_train = np.dot(X_train, V_nn.T)+bk_nn
+#    P_train = sigmoid(a_train)
+#    P_train = my_relu(a_train)  
+#    P_train = my_tanh(a_train)      
+    P_train = my_lrelu(a_train,params_triple[i,2])      
+    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+    RMSE_train[i] = rmse(y_pred_train, y_train)
+    
+    a_val = np.dot(X_val, V_nn.T)+bk_nn
+#    P_val = sigmoid(a_val)
+#    P_val = my_relu(a_val)
+#    P_val = my_tanh(a_val)
+    P_val = my_lrelu(a_val,params_triple[i,2])
+    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+    RMSE_val[i] = rmse(y_pred_val, y_val)
+
+print('on train set:')
+print('rmse train: ')
+print(RMSE_train.min())
+print('params(alpha, beta) train: ')
+print(params_pairs[RMSE_train.argmin()])
+
+print('on val set:')
+print('rmse val: ')
+print(RMSE_val.min())
+print('params(alpha, beta) val: ')
+print(params_pairs[RMSE_val.argmin()])
+
+
+opt=params_pairs[RMSE_val.argmin()]
+# create initial parameters for nn using fits from Q4
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+# fit neural network with fitted parameters from Q4
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt3(X_train, y_train, opt, init_B) #np.array([10,10])
+
+# calculate nn rmse on training set
+a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
+#    P_train = sigmoid(a_train)
+#P_train = my_relu(a_train)  
+#P_train = my_tanh(a_train)   
+P_train = my_lrelu(a_train,opt[2])  
+y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
+print('RMSE for nn on train set: ')
+print(rmse(y_pred_train, y_train))
+
+# calculate nn rmse on validation set
+a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
+#    P_val = sigmoid(a_val)
+#P_val = my_relu(a_val)
+#P_val = my_tanh(a_val)
+P_val = my_lrelu(a_val,opt[2])
+y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
+print('RMSE for nn on test set: ')
+print(rmse(y_pred_val, y_val))
+
+# calculate nn rmse on test set
+a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
+#P_test = sigmoid(a_test)
+#P_test = my_relu(a_test)
+#P_test = my_tanh(a_test)
+P_test = my_lrelu(a_test,opt[2])
+y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
+print('RMSE for nn on test set: ')
+print(rmse(y_pred_test, y_test))
+
