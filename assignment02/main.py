@@ -424,6 +424,8 @@ for i in range(len(alphas)):
     for j in range(len(betas)):
         params_pairs[j+i*len(alphas),0]=alphas[i]
         params_pairs[j+i*len(betas),1]=betas[j]
+        
+#params_pairs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
 
         
 for i in range(len(params_pairs)):
@@ -511,12 +513,13 @@ init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-alphas = np.logspace(-2,2,2,endpoint=True)
-betas = np.logspace(-2,2,2,endpoint=True)
-ps = np.logspace(-2,0,2,endpoint=True)
+alphas = np.logspace(-2,2,4,endpoint=True)
+betas = np.logspace(-2,2,4,endpoint=True)
+ps = np.logspace(-2,0,4,endpoint=True)
 
 params_triple = np.zeros((len(betas)*len(alphas)*len(ps),3))
 RMSE_train = np.zeros(len(params_triple))
+RMSE_val = np.zeros(len(params_triple))
             
 params_triple = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
 
@@ -543,17 +546,17 @@ for i in range(len(params_triple)):
 print('on train set:')
 print('rmse train: ')
 print(RMSE_train.min())
-print('params(alpha, beta) train: ')
-print(params_pairs[RMSE_train.argmin()])
+print('params(alpha, beta,p) train: ')
+print(params_triple[RMSE_train.argmin()])
 
 print('on val set:')
 print('rmse val: ')
 print(RMSE_val.min())
-print('params(alpha, beta) val: ')
-print(params_pairs[RMSE_val.argmin()])
+print('params(alpha, beta,p) val: ')
+print(params_triple[RMSE_val.argmin()])
 
 
-opt=params_pairs[RMSE_val.argmin()]
+opt=params_triple[RMSE_val.argmin()]
 # create initial parameters for nn using fits from Q4
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
