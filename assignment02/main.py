@@ -584,7 +584,7 @@ a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
 #P_val = my_tanh(a_val)
 P_val = my_lrelu(a_val,opt[2])
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
-print('RMSE for nn on test set: ')
+print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
 # calculate nn rmse on test set
