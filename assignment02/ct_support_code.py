@@ -434,11 +434,11 @@ def nn_cost2(params, X, yy=None, alpha=None, beta=None):
 
     # Reverse computation of gradients
     F_bar = 2*res # N,
-    ww_bar = np.dot(P.T, F_bar) + 2*alpha*ww # K,
+    ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
     A_bar = P_bar * P * (1 - P) # N,
-    V_bar = np.dot(A_bar.T, X) + 2*beta*V # K,
+    V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
