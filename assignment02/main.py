@@ -451,7 +451,7 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 # fit neural network with fitted parameters from Q4
-ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, 0.46415888, 0.1, init_B)
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, 0.1, 0.46415888, init_B)
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
