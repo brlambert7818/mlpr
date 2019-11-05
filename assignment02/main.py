@@ -513,9 +513,9 @@ init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-alphas = np.logspace(-2,2,4,endpoint=True)
-betas = np.logspace(-2,2,4,endpoint=True)
-ps = np.logspace(-2,0,4,endpoint=True)
+alphas = np.logspace(1,2,4,endpoint=True)
+betas = np.logspace(0,1,4,endpoint=True)
+ps = np.logspace(-2,1.3,4,endpoint=True)
 
 params_triple = np.zeros((len(betas)*len(alphas)*len(ps),3))
 RMSE_train = np.zeros(len(params_triple))
