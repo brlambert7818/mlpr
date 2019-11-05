@@ -331,3 +331,46 @@ from ct_support_code import *
 
 
 
+# Q6
+
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+alphas = np.logspace(-2,2,6,endpoint=True)
+betas = np.logspace(-2,2,6,endpoint=True)
+
+params_pairs = np.zeros((len(betas)*len(alphas),2))
+RMSE_train = np.zeros(len(params_pairs))
+RMSE_val = np.zeros(len(params_pairs))
+for i in range(len(alphas)):
+    for j in range(len(betas)):
+        params_pairs[j+i*len(alphas),0]=alphas[i]
+        params_pairs[j+i*len(betas),1]=betas[j]
+        
+for i in range(len(params_pairs)):
+    print(i)
+    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, params_pairs[i,1], params_pairs[i,0], init_B)
+    a_train = np.dot(X_train, V_nn.T)+bk_nn
+    P_train = sigmoid(a_train)
+    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+    RMSE_train[i] = rmse(y_pred_train, y_train)
+    
+    a_val = np.dot(X_val, V_nn.T)+bk_nn
+    P_val = sigmoid(a_val)
+    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+    RMSE_val[i] = rmse(y_pred_val, y_val)
+
+print('on train set:')
+print('rmse train: ')
+print(RMSE_train.min())
+print('params(ep, alpha) train: ')
+print(params_pairs[RMSE_train.argmin()])
+
+print('on val set:')
+print('rmse val: ')
+print(RMSE_val.min())
+print('params(ep, alpha) val: ')
+print(params_pairs[RMSE_val.argmin()])

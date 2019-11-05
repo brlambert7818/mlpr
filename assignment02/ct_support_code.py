@@ -358,3 +358,86 @@ def nn_cost(params, X, yy=None, alpha=None):
     bk_bar = np.sum(A_bar, 0)
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
+
+def fit_nn_gradopt2(X, yy, alpha, beta, init):
+    """
+            Fit neural network with a sigmoidal hidden units and a linear output
+            using gradient descent optimizer
+
+                 ww, bb, V, bk = fit_nn_gradopt(X, yy, alpha, init)
+
+             Find weights and bias by using a gradient-based optimizer
+             (minimize_list) to improve the regularized least squares cost:
+
+             Inputs:
+                     X N,D design matrix of input features
+                    yy N,  real-valued targets
+                 alpha     scalar regularization constant
+                params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+
+             Outputs:
+                    ww K,  fitted hidden-output weights
+                    bb     fitted scalar output bias
+                    V K,D  fitted hidden-input weights
+                    bk K,  fitted hidden biases
+            """
+    args = (X, yy, alpha, beta)
+    ww, bb, V, bk = minimize_list(nn_cost2, init, args)
+
+    return ww, bb, V, bk
+
+def nn_cost2(params, X, yy=None, alpha=None, beta=None):
+    """NN_COST simple neural network cost function and gradients, or predictions
+
+           E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
+                    pred = nn_cost([ww, bb, V, bk], X)
+
+     Cost function E can be minimized with minimize_list
+
+     Inputs:
+             params (ww, bb, V, bk), where:
+                    --------------------------------
+                        ww K,  hidden-output weights
+                        bb     scalar output bias
+                         V K,D hidden-input weights
+                        bk K,  hidden biases
+                    --------------------------------
+                  X N,D input design matrix
+                 yy N,  regression targets
+              alpha     scalar regularization for weights
+
+     Outputs:
+                     E  sum of squares error
+            params_bar  gradients wrt params, same format as params
+     OR
+               pred N,  predictions if only params and X are given as inputs
+    """
+    # Unpack parameters from list
+    ww, bb, V, bk = params
+
+    # Forwards computation of cost
+    A = np.dot(X, V.T) + bk[None,:] # N,K
+    P = 1 / (1 + np.exp(-A)) # N,K
+    F = np.dot(P, ww) + bb # N,
+    if yy is None:
+        # user wants prediction rather than training signal:
+        return F
+    res = F - yy # N,
+    E = np.dot(res, res) + alpha*(np.sum(V*V)) + beta*(np.dot(ww,ww)) # 1x1
+
+    # Reverse computation of gradients
+    F_bar = 2*res # N,
+    ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
+    bb_bar = np.sum(F_bar) # scalar
+    P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
+    A_bar = P_bar * P * (1 - P) # N,
+    V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
+    bk_bar = np.sum(A_bar, 0)
+
+    return E, (ww_bar, bb_bar, V_bar, bk_bar)
