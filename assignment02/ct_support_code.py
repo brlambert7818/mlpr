@@ -360,7 +360,7 @@ def nn_cost(params, X, yy=None, alpha=None):
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
 #<<<<<<< Updated upstream
-def fit_nn_gradopt2(X, yy, alpha, beta, init):
+def fit_nn_gradopt2(X, yy, regs, init):
     """
             Fit neural network with a sigmoidal hidden units and a linear output
             using gradient descent optimizer
@@ -388,12 +388,12 @@ def fit_nn_gradopt2(X, yy, alpha, beta, init):
                     V K,D  fitted hidden-input weights
                     bk K,  fitted hidden biases
             """
-    args = (X, yy, alpha, beta)
+    args = (X, yy, regs)
     ww, bb, V, bk = minimize_list(nn_cost2, init, args)
 
     return ww, bb, V, bk
 
-def nn_cost2(params, X, yy=None, alpha=None, beta=None):
+def nn_cost2(params, X, yy=None, regs=None):
     """NN_COST simple neural network cost function and gradients, or predictions
 
            E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
@@ -421,23 +421,31 @@ def nn_cost2(params, X, yy=None, alpha=None, beta=None):
     """
     # Unpack parameters from list
     ww, bb, V, bk = params
-
+    alpha, beta = regs
+    
+#    print(regs)
+#    print(alpha)
+#    print(beta)
     # Forwards computation of cost
     A = np.dot(X, V.T) + bk[None,:] # N,K
-    P = 1 / (1 + np.exp(-A)) # N,K
+#    P = 1 / (1 + np.exp(-A)) # N,K
+    P = my_relu(A)
+#    P = my_tanh(A) # N,K
     F = np.dot(P, ww) + bb # N,
     if yy is None:
         # user wants prediction rather than training signal:
         return F
     res = F - yy # N,
-    E = np.dot(res, res) + alpha*(np.sum(V*V)) + beta*(np.dot(ww,ww)) # 1x1
+    E = np.dot(res, res) + alpha*np.sum(V*V) + beta*np.dot(ww,ww) # 1x1
 
     # Reverse computation of gradients
     F_bar = 2*res # N,
     ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
-    A_bar = P_bar * P * (1 - P) # N,
+#    A_bar = P_bar * P * (1 - P) # N,
+    A_bar = P_bar * d_my_relu(A)# N,
+#    A_bar = P_bar * (1 - P**2)# N,
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 
@@ -544,13 +552,13 @@ def nn_cost2(params, X, yy=None, alpha=None, beta=None):
 #
 #    return ww, bb, V, bk
 
-#def my_tanh(x): return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
-#
-#def my_relu(x): return np.maximum(np.zeros(x.shape),x)
+def my_tanh(x): return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
+
+def my_relu(x): return np.maximum(np.zeros(x.shape),x)
 #def my_lrelu(x): 
 #    x[x[:,:]<=0] = 0.01*x
-#
-#def d_my_relu(x): 
-#    return (x[:,:]>0)*1
-#
+
+def d_my_relu(x): 
+    return (x[:,:]>0)*1
+
 #>>>>>>> Stashed changes

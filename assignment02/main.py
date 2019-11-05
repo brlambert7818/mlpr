@@ -328,6 +328,14 @@ y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
+# calculate nn rmse on test set
+a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
+P_test = sigmoid(a_test)
+y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
+print('RMSE for nn on val set: ')
+print(rmse(y_pred_test, y_test))
+
+
 from ct_support_code import *
 
 #### Q6
@@ -419,14 +427,18 @@ for i in range(len(alphas)):
         
 for i in range(len(params_pairs)):
     print(i)
-    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, params_pairs[i,0], params_pairs[i,1], init_B)
+    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, params_pairs[i,:], init_B)
     a_train = np.dot(X_train, V_nn.T)+bk_nn
-    P_train = sigmoid(a_train)
+#    P_train = sigmoid(a_train)
+    P_train = my_relu(a_train)  
+#    P_train = my_tanh(a_train)      
     y_pred_train = np.dot(P_train,ww_nn) + bb_nn
     RMSE_train[i] = rmse(y_pred_train, y_train)
     
     a_val = np.dot(X_val, V_nn.T)+bk_nn
-    P_val = sigmoid(a_val)
+#    P_val = sigmoid(a_val)
+    P_val = my_relu(a_val)
+#    P_val = my_tanh(a_val)
     y_pred_val = np.dot(P_val,ww_nn) + bb_nn
     RMSE_val[i] = rmse(y_pred_val, y_val)
 
@@ -443,6 +455,7 @@ print('params(alpha, beta) val: ')
 print(params_pairs[RMSE_val.argmin()])
 
 
+opt=params_pairs[RMSE_val.argmin()]
 # create initial parameters for nn using fits from Q4
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
@@ -451,18 +464,33 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 # fit neural network with fitted parameters from Q4
-ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, 0.1, 0.46415888, init_B)
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, opt, init_B)
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
-P_train = sigmoid(a_train)
+#    P_train = sigmoid(a_train)
+P_train = my_relu(a_train)  
+#    P_train = my_tanh(a_train)   
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
 
 # calculate nn rmse on validation set
 a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
-P_val = sigmoid(a_val)
+#    P_val = sigmoid(a_val)
+P_val = my_relu(a_val)
+#    P_val = my_tanh(a_val)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
+
+# calculate nn rmse on test set
+a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
+#    P_test = sigmoid(a_test)
+P_test = my_relu(a_test)
+#    P_test = my_tanh(a_test)
+y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
+print('RMSE for nn on val set: ')
+print(rmse(y_pred_test, y_test))
+
+from ct_support_code import *
