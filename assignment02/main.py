@@ -1,5 +1,5 @@
 #from assignment02.ct_support_code import *
-from ct_support_code import * 
+from ct_support_code import *
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 ### Q1
 
-data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
-#data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
 #data = loadmat('data/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
@@ -238,7 +238,7 @@ hh = (mx - mn) / (K + 1)
 thresholds = np.linspace(mn + hh, mx - hh, num=K, endpoint=True)
 
 #matrix for storing weights for each class. task
-Ws = np.zeros((X_train.shape[1] + 1, K)) 
+Ws = np.zeros((X_train.shape[1] + 1, K))
 
 # Fit logistic regression with gradient descent optimiser
 for kk in range(K):
@@ -247,8 +247,8 @@ for kk in range(K):
 
     # fit log reg for each class(this or other)
     init = (np.zeros(D), np.array(0))  # start with zeros
-    w_fit_temp, b_fitG_temp = fit_logreg_gradopt(X_train, labels, 10, init)
-    
+    w_fit_temp, b_fitG_temp, cost_list = fit_logreg_gradopt(X_train, labels, 10, init)
+
     # store vectors w with bias b
     Ws[:-1, kk] = w_fit_temp
     Ws[-1, kk] = b_fitG_temp
@@ -293,7 +293,11 @@ init_bk = scale_rand * np.random.randn(K)
 init = (init_ww, init_bb, init_V, init_bk)
 
 # fit neural network with randomized initial parameters
-ww_nn, bb_nn, V_nn, bk_nn = fit_nn_gradopt(X_train, y_train, 10, init)
+ww_nn, bb_nn, V_nn, bk_nn, cost_list = fit_nn_gradopt(X_train, y_train, 10, init)
+# plt.clf()
+# plt.plot(cost_list)
+# plt.ylim((1000, 2000))
+# plt.show()
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn.T) + bk_nn
@@ -347,11 +351,7 @@ print('RMSE for nn on test set: ')
 print(rmse(y_pred_test, y_test))
 
 
-from ct_support_code import *
-
-
-
-## SVD
+#### Q6
 
 
 from ct_support_code import *
@@ -361,13 +361,13 @@ def lb(a):
         return 10**(np.log10(a)-0.25)
     else:
         return a-np.log10(a)
-    
+
 def ub(a):
     if a<=1:
         return 10**(np.log10(a)+0.25)
     else:
         return a+np.log10(a)
-    
+
 
 # Q6
 init_ww_B = new_w_fit[:-1, -1]
@@ -381,7 +381,7 @@ alphas = np.logspace(-2,2,comb,endpoint=True)
 betas = np.logspace(-2,2,comb,endpoint=True)
 if activation == my_prelu:
     ps = np.logspace(-2,0,comb,endpoint=True)
-    
+
 
 regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
 #regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
@@ -401,7 +401,7 @@ for j in range(iters):
         alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
         betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
 #        ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
-    
+
         regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
 #        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
     print('regs')
@@ -412,53 +412,53 @@ for j in range(iters):
         print(i)
     #    putin = (activation, regs[i,:])
         ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
-    
+
         #train set
-        a_train = np.dot(X_train, V_nn.T)+bk_nn    
+        a_train = np.dot(X_train, V_nn.T)+bk_nn
         if activation == my_prelu:
             P_train = activation(a_train,regs[i,2])
         else:
             P_train = activation(a_train)
         y_pred_train = np.dot(P_train,ww_nn) + bb_nn
         RMSE_train[i] = rmse(y_pred_train, y_train)
-        
+
         #val set
         a_val = np.dot(X_val, V_nn.T)+bk_nn
         if activation == my_prelu:
             P_val = activation(a_val,regs[i,2])
         else:
-            P_val = activation(a_val)        
+            P_val = activation(a_val)
         y_pred_val = np.dot(P_val,ww_nn) + bb_nn
         RMSE_val[i] = rmse(y_pred_val, y_val)
-        
+
 
     print('rmse on train set:')
     print(RMSE_train.min())
     print('params(alpha, beta,p(?)) train: ')
     print(regs[RMSE_train.argmin()])
-    
+
     print('rmse on val set:')
     print(RMSE_val.min())
     print('params(alpha, beta,p(?)) val: ')
     print(regs[RMSE_val.argmin()])
-    
+
     opts[j,:]=regs[RMSE_val.argmin()]
     ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, opts[j,:], init_B)
-    
+
     #test set
     a_test = np.dot(X_test, V_nn.T)+bk_nn
     if activation == my_prelu:
         P_test = activation(a_test,opts[j,2])
     else:
-        P_test = activation(a_test)        
+        P_test = activation(a_test)
     y_pred_test = np.dot(P_test,ww_nn) + bb_nn
     print('rmse optimal on test set:')
     print(rmse(y_pred_test, y_test))
-    
-    
-  
-    
-    
+
+
+
+
+
 # create initial parameters for nn using fits from Q4
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
@@ -470,7 +470,7 @@ init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, activation, opt, init_B) #np.array([10,10])
 
 # calculate nn rmse on training set
-a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B 
+a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
 if activation == my_prelu:
     P_train = activation(a_train,opt[i,2])
 else:
@@ -518,21 +518,21 @@ ps = np.logspace(-2,1.3,4,endpoint=True)
 params_triple = np.zeros((len(betas)*len(alphas)*len(ps),3))
 RMSE_train = np.zeros(len(params_triple))
 RMSE_val = np.zeros(len(params_triple))
-            
+
 params_triple = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
 
-        
+
 for i in range(len(params_triple)):
     print(i)
     ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt3(X_train, y_train, params_triple[i,:], init_B)
     a_train = np.dot(X_train, V_nn.T)+bk_nn
 #    P_train = sigmoid(a_train)
-#    P_train = my_relu(a_train)  
-#    P_train = my_tanh(a_train)      
-    P_train = my_prelu(a_train,params_triple[i,2])      
+#    P_train = my_relu(a_train)
+#    P_train = my_tanh(a_train)
+    P_train = my_prelu(a_train,params_triple[i,2])
     y_pred_train = np.dot(P_train,ww_nn) + bb_nn
     RMSE_train[i] = rmse(y_pred_train, y_train)
-    
+
     a_val = np.dot(X_val, V_nn.T)+bk_nn
 #    P_val = sigmoid(a_val)
 #    P_val = my_relu(a_val)
@@ -568,9 +568,9 @@ ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt3(X_train, y_train, opt, init_
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
 #    P_train = sigmoid(a_train)
-#P_train = my_relu(a_train)  
-#P_train = my_tanh(a_train)   
-P_train = my_prelu(a_train,opt[2])  
+#P_train = my_relu(a_train)
+#P_train = my_tanh(a_train)
+P_train = my_prelu(a_train,opt[2])
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
@@ -594,4 +594,3 @@ P_test = my_prelu(a_test,opt[2])
 y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
 print('RMSE for nn on test set: ')
 print(rmse(y_pred_test, y_test))
-
