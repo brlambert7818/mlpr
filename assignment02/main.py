@@ -379,15 +379,17 @@ init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 comb = 1
 alphas = np.logspace(-2,2,comb,endpoint=True)
 betas = np.logspace(-2,2,comb,endpoint=True)
-ps = np.logspace(-2,0,comb,endpoint=True)
+if activation == my_prelu:
+    ps = np.logspace(-2,0,comb,endpoint=True)
+    
 
-#regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
+#regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
 RMSE_train = np.zeros(regs.shape[0])
 RMSE_val = np.zeros(regs.shape[0])
 
 
-activation = my_prelu
+activation = my_tanh
 iters = 2
 
 opts = np.zeros((iters, regs.shape[1]))
@@ -398,10 +400,10 @@ for j in range(iters):
     if np.any(opts):
         alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
         betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
-        ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
+#        ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
     
-#        regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+        regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
+#        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
     print('regs')
     print(regs)
     RMSE_train = np.zeros(regs.shape[0])
@@ -446,11 +448,11 @@ for j in range(iters):
     #test set
     a_test = np.dot(X_test, V_nn.T)+bk_nn
     if activation == my_prelu:
-        P_test = activation(a_test,regs[i,2])
+        P_test = activation(a_test,opts[j,2])
     else:
         P_test = activation(a_test)        
     y_pred_test = np.dot(P_test,ww_nn) + bb_nn
-    print('rmse optimal on test set:)
+    print('rmse optimal on test set:')
     print(rmse(y_pred_test, y_test))
     
     
