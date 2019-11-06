@@ -360,7 +360,7 @@ def nn_cost(params, X, yy=None, alpha=None):
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
 
-def fit_nn_gradopt2(X, yy, regs, activation, init):
+def fit_nn_gradopt2(X, yy, activation, regs, init):
     """
             Fit neural network with a sigmoidal hidden units and a linear output
             using gradient descent optimizer
@@ -388,13 +388,14 @@ def fit_nn_gradopt2(X, yy, regs, activation, init):
                     V K,D  fitted hidden-input weights
                     bk K,  fitted hidden biases
             """
-    args = (X, yy, regs, activation)
+#    args = (X, yy, act_reg)
+    args = (X, yy, activation, regs)
     ww, bb, V, bk = minimize_list(nn_cost2, init, args)
 
     return ww, bb, V, bk
 
 
-def nn_cost2(params, X, yy=None):
+def nn_cost2(params, X, yy=None, activation=None, regs=None):#activation=None, regs=None):
     """NN_COST simple neural network cost function and gradients, or predictions
 
            E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
@@ -421,23 +422,23 @@ def nn_cost2(params, X, yy=None):
                pred N,  predictions if only params and X are given as inputs
     """
     # Unpack parameters from list
-    ww, bb, V, bk, regs, activation = params
-    alpha, beta, p = regs
+    ww, bb, V, bk = params
+    if len(regs)==3:
+        alpha, beta, p = regs
+    elif len(regs)==2:
+        alpha, beta = regs
+#    if len(act_reg)==4:
+#        activation, alpha, beta, p = act_reg
+#    elif len(act_reg)==3:
+#        activation, alpha, beta = act_reg
     
-#    print(regs)
-#    print(alpha)
-#    print(beta)
     # Forwards computation of cost
     A = np.dot(X, V.T) + bk[None,:] # N,K
     P = None
-    if activation == 'sigmoid':
-        P = 1 / (1 + np.exp(-A)) # N,K
-    elif activation == 'relu':
-        P = my_relu(A)
-    elif activation == 'tanh':
-        P = my_tanh(A) # N,K
-    elif activation == 'prelu':
-        P = my_lrelu(A, p)
+    if activation == my_prelu:
+        P = activation(A, p) # N,K
+    else:
+        P = activation(A)
     F = np.dot(P, ww) + bb # N,
     if yy is None:
         # user wants prediction rather than training signal:
@@ -452,17 +453,17 @@ def nn_cost2(params, X, yy=None):
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
 
     A_bar = None
-    if activation == 'sigmoid':
+    if activation == sigmoid:
         A_bar = P_bar * P * (1 - P)  # N,
-    elif activation == 'relu':
+    elif activation == my_relu:
         A_bar = P_bar * d_my_relu(A)  # N,
-    elif activation == 'tanh':
+    elif activation == my_tanh:
         A_bar = P_bar * (1 - P ** 2)  # N,
-    elif activation == 'prelu':
-        A_bar = P_bar * d_my_lrelu(A,p)# N,
+    elif activation == my_prelu:
+        A_bar = P_bar * d_my_prelu(A,p)# N,
 
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
-    bk_bar = np.sum(A_bar, 0)
+    bk_bar = np.sum(A_bar, 0) # scalar
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
@@ -539,7 +540,7 @@ def nn_cost3(params, X, yy=None, regs=None):
 #    P = 1 / (1 + np.exp(-A)) # N,K
 #    P = my_relu(A)
 #    P = my_tanh(A) # N,K
-    P = my_lrelu(A,p)
+    P = my_prelu(A,p)
     F = np.dot(P, ww) + bb # N,
     if yy is None:
         # user wants prediction rather than training signal:
@@ -555,7 +556,7 @@ def nn_cost3(params, X, yy=None, regs=None):
 #    A_bar = P_bar * P * (1 - P) # N, # sigmoid derivative
 #    A_bar = P_bar * d_my_relu(A)# N, # relu der
 #    A_bar = P_bar * (1 - P**2)# N, # tanh derivative
-    A_bar = P_bar * d_my_lrelu(A,p)# N, #Prelu derivative
+    A_bar = P_bar * d_my_prelu(A,p)# N, #Prelu derivative
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 
@@ -664,12 +665,12 @@ def my_tanh(x): return (np.exp(x)-np.exp(-x))/(np.exp(x)+np.exp(-x))
 
 def my_relu(x): return np.maximum(np.zeros(x.shape),x)
 
-def my_lrelu(x,p): 
+def my_prelu(x,p): 
     return np.maximum(x*p,x)
     
 def d_my_relu(x): 
     return (x[:,:]>0)*1
 
-def d_my_lrelu(x,p):
+def d_my_prelu(x,p):
     return (x[:,:]>0)*1+(x[:,:]<=0)*p
 
