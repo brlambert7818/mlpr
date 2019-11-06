@@ -359,8 +359,8 @@ def nn_cost(params, X, yy=None, alpha=None):
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
-#<<<<<<< Updated upstream
-def fit_nn_gradopt2(X, yy, regs, init):
+
+def fit_nn_gradopt2(X, yy, regs, activation, init):
     """
             Fit neural network with a sigmoidal hidden units and a linear output
             using gradient descent optimizer
@@ -388,12 +388,13 @@ def fit_nn_gradopt2(X, yy, regs, init):
                     V K,D  fitted hidden-input weights
                     bk K,  fitted hidden biases
             """
-    args = (X, yy, regs)
+    args = (X, yy, regs, activation)
     ww, bb, V, bk = minimize_list(nn_cost2, init, args)
 
     return ww, bb, V, bk
 
-def nn_cost2(params, X, yy=None, regs=None):
+
+def nn_cost2(params, X, yy=None):
     """NN_COST simple neural network cost function and gradients, or predictions
 
            E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
@@ -420,19 +421,23 @@ def nn_cost2(params, X, yy=None, regs=None):
                pred N,  predictions if only params and X are given as inputs
     """
     # Unpack parameters from list
-    ww, bb, V, bk = params
-    alpha, beta = regs
+    ww, bb, V, bk, regs, activation = params
+    alpha, beta, p = regs
     
 #    print(regs)
 #    print(alpha)
 #    print(beta)
     # Forwards computation of cost
     A = np.dot(X, V.T) + bk[None,:] # N,K
-#    P = 1 / (1 + np.exp(-A)) # N,K
-#    P = my_relu(A)
-#    P = my_tanh(A) # N,K
-    p=0.01
-    P = my_lrelu(A,p)
+    P = None
+    if activation == 'sigmoid':
+        P = 1 / (1 + np.exp(-A)) # N,K
+    elif activation == 'relu':
+        P = my_relu(A)
+    elif activation == 'tanh':
+        P = my_tanh(A) # N,K
+    elif activation == 'prelu':
+        P = my_lrelu(A, p)
     F = np.dot(P, ww) + bb # N,
     if yy is None:
         # user wants prediction rather than training signal:
@@ -445,14 +450,22 @@ def nn_cost2(params, X, yy=None, regs=None):
     ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
-#    A_bar = P_bar * P * (1 - P) # N,
-#    A_bar = P_bar * d_my_relu(A)# N,
-#    A_bar = P_bar * (1 - P**2)# N,
-    A_bar = P_bar * d_my_lrelu(A,p)# N,
+
+    A_bar = None
+    if activation == 'sigmoid':
+        A_bar = P_bar * P * (1 - P)  # N,
+    elif activation == 'relu':
+        A_bar = P_bar * d_my_relu(A)  # N,
+    elif activation == 'tanh':
+        A_bar = P_bar * (1 - P ** 2)  # N,
+    elif activation == 'prelu':
+        A_bar = P_bar * d_my_lrelu(A,p)# N,
+
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
+
 
 def fit_nn_gradopt3(X, yy, regs, init):
     """
@@ -486,6 +499,7 @@ def fit_nn_gradopt3(X, yy, regs, init):
     ww, bb, V, bk = minimize_list(nn_cost3, init, args)
 
     return ww, bb, V, bk
+
 
 def nn_cost3(params, X, yy=None, regs=None):
     """NN_COST simple neural network cost function and gradients, or predictions
@@ -547,8 +561,6 @@ def nn_cost3(params, X, yy=None, regs=None):
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
-#=======
-#>>>>>>> Stashed changes
 #def nn_cost2(params, X, yy=None, alpha=None, beta=None):
 #    """NN_COST simple neural network cost function and gradients, or predictions
 #
@@ -661,4 +673,3 @@ def d_my_relu(x):
 def d_my_lrelu(x,p):
     return (x[:,:]>0)*1+(x[:,:]<=0)*p
 
-#>>>>>>> Stashed changes
