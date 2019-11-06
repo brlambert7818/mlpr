@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 ### Q1
 
-# data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
-data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+#data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
 #data = loadmat('data/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
@@ -357,13 +357,21 @@ print(rmse(y_pred_test, y_test))
 from ct_support_code import *
 
 # Q6
-init_ww_B = new_w_fit[:-1, -1]
-init_bb_B = new_w_fit[-1, :]
-init_V_B = Ws[:-1, :].T
-init_bk_B = Ws[-1, :]
-init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+#init_ww_B = new_w_fit[:-1, -1]
+#init_bb_B = new_w_fit[-1, :]
+#init_V_B = Ws[:-1, :].T
+#init_bk_B = Ws[-1, :]
+#init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-comb = 1
+K=10
+scale_rand = 0.1 / np.sqrt(K)
+init_ww = scale_rand * np.random.randn(K)
+init_bb = 0.1 * np.random.randn(1)
+init_V = scale_rand * np.random.randn(K, D)
+init_bk = scale_rand * np.random.randn(K)
+init_B = (init_ww, init_bb, init_V, init_bk)
+
+comb = 2
 iters = 2
 activation = my_tanh
 
@@ -378,6 +386,10 @@ else:
 RMSE_train = np.zeros(regs.shape[0])
 RMSE_val = np.zeros(regs.shape[0])
 
+W=[]
+#for i in range(regs.shape[0]):
+#    W.append(init_B)
+
 
 opts = np.zeros((iters, regs.shape[1]))
 
@@ -388,6 +400,8 @@ for j in range(iters):
     if np.any(opts):
         alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
         betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
+        init_B = W[RMSE_train.argmin()]
+        W = []
         if activation == my_prelu:
             ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
             regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
@@ -400,7 +414,7 @@ for j in range(iters):
     for i in range(regs.shape[0]):
         print(i)
         ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
-
+        W.append((ww_nn, bb_nn, V_nn, bk_nn))
         #train set
         a_train = np.dot(X_train, V_nn.T)+bk_nn
         if activation == my_prelu:
@@ -442,9 +456,22 @@ for j in range(iters):
     y_pred_test = np.dot(P_test,ww_nn) + bb_nn
     print('rmse optimal on test set:')
     print(rmse(y_pred_test, y_test))
+    
+opt_init = init_B
+opt_regs = opts[-1,:]
 
 
+ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, opt_regs, opt_init)
 
+#test set
+a_test = np.dot(X_test, V_nn.T)+bk_nn
+if activation == my_prelu:
+    P_test = activation(a_test,opt_regs[2])
+else:
+    P_test = activation(a_test)
+y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+print('rmse optimal on test set:')
+print(rmse(y_pred_test, y_test))
 
 
 # create initial parameters for nn using fits from Q4
