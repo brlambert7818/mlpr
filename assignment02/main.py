@@ -105,127 +105,127 @@ y_test = data['y_test']
 ## Q2
 
 # fit model with lstsq using fit_linreg()
-# w_fit = fit_linreg(X_train, y_train, 10)
-# y_pred_train = np.dot(phi_linear(X_train), w_fit)[:, -1]
-# y_pred_val = np.dot(phi_linear(X_val), w_fit)[:, -1]
-#
-# # rmse from lstsq
-# rmse_train_lstsq = rmse(y_pred_train, y_train)
-# rmse_val_lstsq = rmse(y_pred_val, y_val)
-# print('full feature linreg rmse:')
-# print(rmse(y_pred_train, y_train))
-# print(rmse(y_pred_val, y_val))
-# print('')
-#
-# # fit model with gradient approach using fit_linreg_gradopt()
-# w_fitG, b_fitG = fit_linreg_gradopt(X_train, y_train, 10)
-# y_pred_trainG = np.add(np.dot(X_train, w_fitG), b_fitG)
-# y_pred_valG = np.add(np.dot(X_val, w_fitG), b_fitG)
-#
-# # rmse from gradopt
-# rmse_train_gradopt = rmse(y_pred_trainG, y_train)
-# rmse_val_gradopt = rmse(y_pred_valG, y_val)
-# print('full feature gradopt rmse:')
-# print(rmse(y_pred_trainG, y_train))
-# print(rmse(y_pred_valG, y_val))
-# print('')
-#
-# # Yes, the results are the same, as the gradient descent optimizer approaches the LS-solution.
-#
-#
-# ### Q3
-#
-# ## Q3a
-# D_test = X_test.shape[1] #number of features
-#
-# # reduce X dimensions to k = 10
-# R_10 = random_proj(D_test, 10)
-# X_train_reduc10 = np.matmul(X_train, R_10)
-# X_val_reduc10 = np.matmul(X_val, R_10)
-#
-# # fit linear regression model using k = 10 input dimensions
-# w_fit_reduc10 = fit_linreg(X_train_reduc10, y_train, 10)
-# y_pred_train10 = np.dot(phi_linear(X_train_reduc10), w_fit_reduc10)[:, -1]
-# y_pred_val10 = np.dot(phi_linear(X_val_reduc10), w_fit_reduc10)[:, -1]
-#
-# #calcuate rmse for k=10
-# rmse_train_10 = rmse(y_pred_train10, y_train)
-# rmse_val_10 = rmse(y_pred_val10, y_val)
-# print('10 feature rmse:')
-# print(rmse(y_pred_train10, y_train))
-# print(rmse(y_pred_val10, y_val))
-# print('')
-#
-#
-# # reduce X dimensions to k = 100
-# R_100 = random_proj(D_test, 100)
-# X_train_reduc100 = np.matmul(X_train, R_100)
-# X_val_reduc100 = np.matmul(X_val, R_100)
-#
-# # fit linear regression model using k = 10 input dimensions
-# w_fit_reduc100 = fit_linreg(X_train_reduc100, y_train, 100)
-# y_pred_train100 = np.dot(phi_linear(X_train_reduc100), w_fit_reduc100)[:, -1]
-# y_pred_val100 = np.dot(phi_linear(X_val_reduc100), w_fit_reduc100)[:, -1]
-#
-# #calcuate rmse for k=100
-# rmse_train_100 = rmse(y_pred_train100, y_train)
-# rmse_val_100 = rmse(y_pred_val100, y_val)
-# print('100 feature rmse:')
-# print(rmse(y_pred_train100, y_train))
-# print(rmse(y_pred_val100, y_val))
-#
-# # Q3b
-#
-# # histogram of 46th feature and five extra random features for comparison
-# noBins = 15
-# whichFeatures = np.concatenate([[45], np.random.randint(0, X_train.shape[1], 5)])
-# f1 = plt.gcf()
-# for i in range(0, 6):
-#     plt.subplot(2, 3, i + 1)
-#     plt.hist(X_train.T[whichFeatures[i]], bins=noBins)
-#     plt.title('hist. for feature ' + str(whichFeatures[i] + 1))
-#     plt.xlabel('X_train values', fontsize=14)
-#     plt.ylabel('frequency', fontsize=14)
-#     plt.subplots_adjust(hspace=0.8, left=0.1, wspace=0.5)
-#     plt.xticks(np.arange(-0.25, 1.25, step=0.25))
-# plt.show()
-# #f1.set_size_inches(12, 7)
-# #f1.savefig('3b_hist.pdf')
-#
-# no_of_val_train = X_train.shape[0] * X_train.shape[1]  # number of all values in X_train
-#
-# # X-train values = -0.25
-# count_25 = 0
-# for row in X_train:
-#     count_25 += (row == -0.25).sum()
-#
-# frac_25 = count_25 / no_of_val_train
-# print('Fraction of values=-0.25: ' + str(frac_25))
-#
-# # X-train values = 0
-# count_0 = 0
-# for row in X_train:
-#     count_0 += (row == 0).sum()
-#
-# frac_0 = count_0 / no_of_val_train
-# print('Fraction of values=0: ' + str(frac_0))
-#
-# # use aug_fn() to add extra binary features to X_train
-# X_train_aug = aug_fn(X_train)
-# X_val_aug = aug_fn(X_val)
-#
-# # report rmse for augmented training and validation sets
-# w_fit_aug = fit_linreg(X_train_aug, y_train, 10)
-# y_pred_train_aug = np.dot(phi_linear(X_train_aug), w_fit_aug)[:, -1]
-# y_pred_val_aug = np.dot(phi_linear(X_val_aug), w_fit_aug)[:, -1]
-#
-# #Calculate RMSE for extra binary feature X
-# rmse_train_aug = rmse(y_pred_train_aug, y_train)
-# rmse_val_aug = rmse(y_pred_val_aug, y_val)
-#
-# print('full feature(aug) linreg rmse:')
-# print(rmse(y_pred_train_aug, y_train))
-# print(rmse(y_pred_val_aug, y_val))
+w_fit = fit_linreg(X_train, y_train, 10)
+y_pred_train = np.dot(phi_linear(X_train), w_fit)[:, -1]
+y_pred_val = np.dot(phi_linear(X_val), w_fit)[:, -1]
+
+# rmse from lstsq
+rmse_train_lstsq = rmse(y_pred_train, y_train)
+rmse_val_lstsq = rmse(y_pred_val, y_val)
+print('full feature linreg rmse:')
+print(rmse(y_pred_train, y_train))
+print(rmse(y_pred_val, y_val))
+print('')
+
+# fit model with gradient approach using fit_linreg_gradopt()
+w_fitG, b_fitG = fit_linreg_gradopt(X_train, y_train, 10)
+y_pred_trainG = np.add(np.dot(X_train, w_fitG), b_fitG)
+y_pred_valG = np.add(np.dot(X_val, w_fitG), b_fitG)
+
+# rmse from gradopt
+rmse_train_gradopt = rmse(y_pred_trainG, y_train)
+rmse_val_gradopt = rmse(y_pred_valG, y_val)
+print('full feature gradopt rmse:')
+print(rmse(y_pred_trainG, y_train))
+print(rmse(y_pred_valG, y_val))
+print('')
+
+# Yes, the results are the same, as the gradient descent optimizer approaches the LS-solution.
+
+
+### Q3
+
+## Q3a
+D_test = X_test.shape[1] #number of features
+
+# reduce X dimensions to k = 10
+R_10 = random_proj(D_test, 10)
+X_train_reduc10 = np.matmul(X_train, R_10)
+X_val_reduc10 = np.matmul(X_val, R_10)
+
+# fit linear regression model using k = 10 input dimensions
+w_fit_reduc10 = fit_linreg(X_train_reduc10, y_train, 10)
+y_pred_train10 = np.dot(phi_linear(X_train_reduc10), w_fit_reduc10)[:, -1]
+y_pred_val10 = np.dot(phi_linear(X_val_reduc10), w_fit_reduc10)[:, -1]
+
+#calcuate rmse for k=10
+rmse_train_10 = rmse(y_pred_train10, y_train)
+rmse_val_10 = rmse(y_pred_val10, y_val)
+print('10 feature rmse:')
+print(rmse(y_pred_train10, y_train))
+print(rmse(y_pred_val10, y_val))
+print('')
+
+
+# reduce X dimensions to k = 100
+R_100 = random_proj(D_test, 100)
+X_train_reduc100 = np.matmul(X_train, R_100)
+X_val_reduc100 = np.matmul(X_val, R_100)
+
+# fit linear regression model using k = 10 input dimensions
+w_fit_reduc100 = fit_linreg(X_train_reduc100, y_train, 100)
+y_pred_train100 = np.dot(phi_linear(X_train_reduc100), w_fit_reduc100)[:, -1]
+y_pred_val100 = np.dot(phi_linear(X_val_reduc100), w_fit_reduc100)[:, -1]
+
+#calcuate rmse for k=100
+rmse_train_100 = rmse(y_pred_train100, y_train)
+rmse_val_100 = rmse(y_pred_val100, y_val)
+print('100 feature rmse:')
+print(rmse(y_pred_train100, y_train))
+print(rmse(y_pred_val100, y_val))
+
+# Q3b
+
+# histogram of 46th feature and five extra random features for comparison
+noBins = 15
+whichFeatures = np.concatenate([[45], np.random.randint(0, X_train.shape[1], 5)])
+f1 = plt.gcf()
+for i in range(0, 6):
+    plt.subplot(2, 3, i + 1)
+    plt.hist(X_train.T[whichFeatures[i]], bins=noBins)
+    plt.title('hist. for feature ' + str(whichFeatures[i] + 1))
+    plt.xlabel('X_train values', fontsize=14)
+    plt.ylabel('frequency', fontsize=14)
+    plt.subplots_adjust(hspace=0.8, left=0.1, wspace=0.5)
+    plt.xticks(np.arange(-0.25, 1.25, step=0.25))
+plt.show()
+#f1.set_size_inches(12, 7)
+#f1.savefig('3b_hist.pdf')
+
+no_of_val_train = X_train.shape[0] * X_train.shape[1]  # number of all values in X_train
+
+# X-train values = -0.25
+count_25 = 0
+for row in X_train:
+    count_25 += (row == -0.25).sum()
+
+frac_25 = count_25 / no_of_val_train
+print('Fraction of values=-0.25: ' + str(frac_25))
+
+# X-train values = 0
+count_0 = 0
+for row in X_train:
+    count_0 += (row == 0).sum()
+
+frac_0 = count_0 / no_of_val_train
+print('Fraction of values=0: ' + str(frac_0))
+
+# use aug_fn() to add extra binary features to X_train
+X_train_aug = aug_fn(X_train)
+X_val_aug = aug_fn(X_val)
+
+# report rmse for augmented training and validation sets
+w_fit_aug = fit_linreg(X_train_aug, y_train, 10)
+y_pred_train_aug = np.dot(phi_linear(X_train_aug), w_fit_aug)[:, -1]
+y_pred_val_aug = np.dot(phi_linear(X_val_aug), w_fit_aug)[:, -1]
+
+#Calculate RMSE for extra binary feature X
+rmse_train_aug = rmse(y_pred_train_aug, y_train)
+rmse_val_aug = rmse(y_pred_val_aug, y_val)
+
+print('full feature(aug) linreg rmse:')
+print(rmse(y_pred_train_aug, y_train))
+print(rmse(y_pred_val_aug, y_val))
 
 
 ### Q4
@@ -341,71 +341,68 @@ print(rmse(y_pred_test, y_test))
 
 
 #### Q6
-#init_ww_B = new_w_fit[:-1, -1]
-#init_bb_B = new_w_fit[-1, :]
-#init_V_B = Ws[:-1, :].T
-#init_bk_B = Ws[-1, :]
-#init = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
-#
-#alphas = np.logspace(-2,2,10)
-#RMSE_train = np.zeros(len(alphas))
-#RMSE_val = np.zeros(len(alphas))
-#for i in range(len(alphas)):
-#    print(i)
-#    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt(X_train, y_train, alphas[i], init)
-#    a_train = np.dot(X_train, V_nn.T)+bk_nn
-#    P_train = sigmoid(a_train)
-#    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
-#    RMSE_train[i] = rmse(y_pred_train, y_train)
-#    
-#    a_val = np.dot(X_val, V_nn.T)+bk_nn
-#    P_val = sigmoid(a_val)
-#    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
-#    RMSE_val[i] = rmse(y_pred_val, y_val)
-#
-#print('on train set:')
-#print('rmse train: ')
-#print(RMSE_train.min())
-#print('params(ep, alpha) train: ')
-#print(alphas[RMSE_train.argmin()])
-#
-#print('on val set:')
-#print('rmse val: ')
-#print(RMSE_val.min())
-#print('params(ep, alpha) val: ')
-#print(alphas[RMSE_val.argmin()])
-#
-### Q6 - tanh
-#
-## create initial parameters for nn using fits from Q4
-#init_ww_B = new_w_fit[:-1, -1]
-#init_bb_B = new_w_fit[-1, :]
-#init_V_B = Ws[:-1, :].T
-#init_bk_B = Ws[-1, :]
-#init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
-#
-## fit neural network with fitted parameters from Q4
-#ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, 10, 10, init_B)
-#
-## calculate nn rmse on training set
-#a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
-##P_train = my_tanh(a_train)
-#P_train = my_relu(a_train)
-#
-#y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
-#print('RMSE for nn on train set: ')
-#print(rmse(y_pred_train, y_train))
-#
-## calculate nn rmse on validation set
-#a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
-##P_val = my_tanh(a_val)
-#P_val = my_relu(a_val)
-#y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
-#print('RMSE for nn on val set: ')
-#print(rmse(y_pred_val, y_val))
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-from ct_support_code import *
+alphas = np.logspace(-2,2,10)
+RMSE_train = np.zeros(len(alphas))
+RMSE_val = np.zeros(len(alphas))
+for i in range(len(alphas)):
+   print(i)
+   ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt(X_train, y_train, alphas[i], init)
+   a_train = np.dot(X_train, V_nn.T)+bk_nn
+   P_train = sigmoid(a_train)
+   y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+   RMSE_train[i] = rmse(y_pred_train, y_train)
 
+   a_val = np.dot(X_val, V_nn.T)+bk_nn
+   P_val = sigmoid(a_val)
+   y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+   RMSE_val[i] = rmse(y_pred_val, y_val)
+
+print('on train set:')
+print('rmse train: ')
+print(RMSE_train.min())
+print('params(ep, alpha) train: ')
+print(alphas[RMSE_train.argmin()])
+
+print('on val set:')
+print('rmse val: ')
+print(RMSE_val.min())
+print('params(ep, alpha) val: ')
+print(alphas[RMSE_val.argmin()])
+
+## Q6 - tanh
+
+# create initial parameters for nn using fits from Q4
+init_ww_B = new_w_fit[:-1, -1]
+init_bb_B = new_w_fit[-1, :]
+init_V_B = Ws[:-1, :].T
+init_bk_B = Ws[-1, :]
+init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
+
+# fit neural network with fitted parameters from Q4
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, 10, 10, init_B)
+
+# calculate nn rmse on training set
+a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
+#P_train = my_tanh(a_train)
+P_train = my_relu(a_train)
+
+y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
+print('RMSE for nn on train set: ')
+print(rmse(y_pred_train, y_train))
+
+# calculate nn rmse on validation set
+a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
+#P_val = my_tanh(a_val)
+P_val = my_relu(a_val)
+y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
+print('RMSE for nn on val set: ')
+print(rmse(y_pred_val, y_val))
 
 
 # Q6
