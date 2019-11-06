@@ -363,8 +363,8 @@ init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-comb = 1
-iters = 2
+comb = 7
+iters = 4
 activation = my_tanh
 
 alphas = np.logspace(-2,2,comb,endpoint=True)
@@ -382,8 +382,8 @@ RMSE_val = np.zeros(regs.shape[0])
 opts = np.zeros((iters, regs.shape[1]))
 
 for j in range(iters):
-    print('opts:')
-    print(opts)
+#    print('opts:')
+#    print(opts)
     if np.any(opts):
         alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
         betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
@@ -392,13 +392,12 @@ for j in range(iters):
             regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
         else:
             regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-    print('regs')
-    print(regs)
+#    print('regs')
+#    print(regs)
     RMSE_train = np.zeros(regs.shape[0])
     RMSE_val = np.zeros(regs.shape[0])
     for i in range(regs.shape[0]):
         print(i)
-    #    putin = (activation, regs[i,:])
         ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
 
         #train set
@@ -455,7 +454,14 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 # fit neural network with fitted parameters from Q4
-ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, activation, opt, init_B) #np.array([10,10])
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B, costlistS = fit_nn_gradopt2(X_train, y_train, sigmoid, np.array([10,10]), init_B) #np.array([10,10])
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B, costlistT = fit_nn_gradopt2(X_train, y_train, my_tanh, np.array([10,10]), init_B) #np.array([10,10])
+
+plt.plot(costlistS, label='sig')
+plt.plot(costlistT, label='tanh')
+#plt.ylim([0, 2000])
+plt.legend()
+plt.show
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
