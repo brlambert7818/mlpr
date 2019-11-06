@@ -356,19 +356,6 @@ print(rmse(y_pred_test, y_test))
 
 from ct_support_code import *
 
-def lb(a):
-    if a<=1:
-        return 10**(np.log10(a)-0.25)
-    else:
-        return a-np.log10(a)
-
-def ub(a):
-    if a<=1:
-        return 10**(np.log10(a)+0.25)
-    else:
-        return a+np.log10(a)
-
-
 # Q6
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
@@ -377,20 +364,20 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 comb = 1
+iters = 2
+activation = my_tanh
+
 alphas = np.logspace(-2,2,comb,endpoint=True)
 betas = np.logspace(-2,2,comb,endpoint=True)
 if activation == my_prelu:
     ps = np.logspace(-2,0,comb,endpoint=True)
+    regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+else:
+    regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
 
-
-regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-#regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
 RMSE_train = np.zeros(regs.shape[0])
 RMSE_val = np.zeros(regs.shape[0])
 
-
-activation = my_tanh
-iters = 2
 
 opts = np.zeros((iters, regs.shape[1]))
 
@@ -400,10 +387,11 @@ for j in range(iters):
     if np.any(opts):
         alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
         betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
-#        ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
-
-        regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-#        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+        if activation == my_prelu:
+            ps = np.logspace(np.log10(lb(opts[j-1,2])),np.log10(ub(opts[j-1,2])),comb,endpoint=True)
+            regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+        else:
+            regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
     print('regs')
     print(regs)
     RMSE_train = np.zeros(regs.shape[0])
@@ -411,7 +399,7 @@ for j in range(iters):
     for i in range(regs.shape[0]):
         print(i)
     #    putin = (activation, regs[i,:])
-        ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
+        ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
 
         #train set
         a_train = np.dot(X_train, V_nn.T)+bk_nn
@@ -443,7 +431,7 @@ for j in range(iters):
     print(regs[RMSE_val.argmin()])
 
     opts[j,:]=regs[RMSE_val.argmin()]
-    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, opts[j,:], init_B)
+    ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, opts[j,:], init_B)
 
     #test set
     a_test = np.dot(X_test, V_nn.T)+bk_nn

@@ -397,9 +397,13 @@ def fit_nn_gradopt2(X, yy, activation, regs, init):
             """
 #    args = (X, yy, act_reg)
     args = (X, yy, activation, regs)
-    ww, bb, V, bk = minimize_list(nn_cost2, init, args)
+#    ww, bb, V, bk = minimize_list(nn_cost2, init, args)
+#    return ww, bb, V, bk
+    min_list = minimize_list(nn_cost2, init, args)
+    ww, bb, V, bk = min_list[0]
+    cost_list = min_list[1]
 
-    return ww, bb, V, bk
+    return ww, bb, V, bk, cost_list
 
 
 def nn_cost2(params, X, yy=None, activation=None, regs=None):#activation=None, regs=None):
@@ -582,3 +586,15 @@ def d_my_relu(x):
 
 def d_my_prelu(x,p):
     return (x[:,:]>0)*1+(x[:,:]<=0)*p
+
+def lb(a):
+    if a<=1:
+        return 10**(np.log10(a)-0.25)
+    else:
+        return a-np.log10(a)
+
+def ub(a):
+    if a<=1:
+        return 10**(np.log10(a)+0.25)
+    else:
+        return a+np.log10(a)
