@@ -6,7 +6,7 @@
 # You will need numpy and scipy:
 import numpy as np
 from scipy.optimize import minimize
-
+import matplotlib.pyplot as plt
 
 def phi_linear(xin):
     """ Adds a bias term to the input matrix
@@ -121,12 +121,14 @@ def minimize_list(cost, init_list, args):
     """
     opt = {'maxiter': 500, 'disp': False}
     init, unwrap = params_wrap(init_list)
+    cost_list = []
     def wrap_cost(vec, *args):
         E, params_bar = cost(unwrap(vec), *args)
         vec_bar, _ = params_wrap(params_bar)
+        cost_list.append(round(E, 4))
         return E, vec_bar
     res = minimize(wrap_cost, init, args, 'L-BFGS-B', jac=True, options=opt)
-    return unwrap(res.x)
+    return (unwrap(res.x), cost_list)
 
 
 def linreg_cost(params, X, yy, alpha):
@@ -182,8 +184,10 @@ def fit_linreg_gradopt(X, yy, alpha):
     D = X.shape[1]
     args = (X, yy, alpha)
     init = (np.zeros(D), np.array(0))
-    ww, bb = minimize_list(linreg_cost, init, args)
-    return ww, bb
+    fit = minimize_list(linreg_cost, init, args)
+    ww, bb = fit[0]
+    cost_list = fit[1]
+    return ww, bb, cost_list
 
 
 def fit_logreg_gradopt(X, yy, alpha, init):
@@ -210,8 +214,10 @@ def fit_logreg_gradopt(X, yy, alpha, init):
                 bb     scalar fitted bias
         """
     args = (X, yy, alpha)
-    ww, bb = minimize_list(logreg_cost, init, args)
-    return ww, bb
+    fit = minimize_list(logreg_cost, init, args)
+    ww, bb = fit[0]
+    cost_list = fit[1]
+    return ww, bb, cost_list
 
 
 def random_proj(D, K=None, seed=0):
@@ -304,9 +310,11 @@ def fit_nn_gradopt(X, yy, alpha, init):
                     bk K,  fitted hidden biases
             """
     args = (X, yy, alpha)
-    ww, bb, V, bk = minimize_list(nn_cost, init, args)
+    min_list = minimize_list(nn_cost, init, args)
+    ww, bb, V, bk = min_list[0]
+    cost_list = min_list[1]
 
-    return ww, bb, V, bk
+    return ww, bb, V, bk, cost_list
 
 
 def nn_cost(params, X, yy=None, alpha=None):
@@ -356,7 +364,6 @@ def nn_cost(params, X, yy=None, alpha=None):
     A_bar = P_bar * P * (1 - P) # N,
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
-
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
 
@@ -394,7 +401,7 @@ def fit_nn_gradopt2(X, yy, regs, activation, init):
     return ww, bb, V, bk
 
 
-def nn_cost2(params, X, yy=None):
+def nn_cost2(params, X, yy=None, regs=None):
     """NN_COST simple neural network cost function and gradients, or predictions
 
            E, params_bar = nn_cost([ww, bb, V, bk], X, yy, alpha)
