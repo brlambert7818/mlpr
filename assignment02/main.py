@@ -349,6 +349,8 @@ print(rmse(y_pred_test, y_test))
 
 from ct_support_code import *
 
+
+
 ## SVD
 
 
@@ -420,7 +422,18 @@ U, S, V = np.linalg.svd(X_train)
 
 from ct_support_code import *
 
-
+def lb(a):
+    if a<=1:
+        return 10**(np.log10(a)-0.25)
+    else:
+        return a-np.log10(a)
+    
+def ub(a):
+    if a<=1:
+        return 10**(np.log10(a)+0.25)
+    else:
+        return a+np.log10(a)
+    
 
 # Q6
 init_ww_B = new_w_fit[:-1, -1]
@@ -429,54 +442,77 @@ init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-alphas = np.logspace(-2,2,1,endpoint=True)
-betas = np.logspace(-2,2,1,endpoint=True)
+comb = 1
+alphas = np.logspace(-2,2,comb,endpoint=True)
+betas = np.logspace(-2,2,comb,endpoint=True)
+ps = np.logspace(-2,0,comb,endpoint=True)
 
 regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
-RMSE_train = np.zeros(len(regs))
-RMSE_val = np.zeros(len(regs))
+#regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+RMSE_train = np.zeros(regs.shape[0])
+RMSE_val = np.zeros(regs.shape[0])
 
-act = my_tanh
-regs[0,0]=2.51188643
-regs[0,1]=0.06309573
-#putin = (activation, regs[i,:])
-for i in range(len(regs)):
-    print(i)
-#    putin = (activation, regs[i,:])
-    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, act, regs[i,:], init_B)
 
-    #train set
-    a_train = np.dot(X_train, V_nn.T)+bk_nn    
-    if act == my_prelu:
-        P_train = act(a_train,regs[i,2])
-    else:
-        P_train = act(a_train)
-    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
-    RMSE_train[i] = rmse(y_pred_train, y_train)
+activation = my_tanh
+iters = 2
+
+opts = np.zeros((iters, regs.shape[1]))
+
+for j in range(iters):
+    print('opts:')
+    print(opts)
+    if np.any(opts):
+        alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
+        betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
+#        ps = np.logspace(np.log10(lb(opts[j,2])),np.log10(ub(opts[j,2])),comb,endpoint=True)
     
-    #val set
-    a_val = np.dot(X_val, V_nn.T)+bk_nn
-    if act == my_prelu:
-        P_val = act(a_val,regs[i,2])
-    else:
-        P_val = act(a_val)        
-    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
-    RMSE_val[i] = rmse(y_pred_val, y_val)
+        regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
+#        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+    print('regs')
+    print(regs)
+    RMSE_train = np.zeros(regs.shape[0])
+    RMSE_val = np.zeros(regs.shape[0])
+#    opts = np.zeros((iters, regs.shape[1]))
+    #putin = (activation, regs[i,:])
+    for i in range(regs.shape[0]):
+        print(i)
+    #    putin = (activation, regs[i,:])
+        ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
+    
+        #train set
+        a_train = np.dot(X_train, V_nn.T)+bk_nn    
+        if activation == my_prelu:
+            P_train = activation(a_train,regs[i,2])
+        else:
+            P_train = activation(a_train)
+        y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+        RMSE_train[i] = rmse(y_pred_train, y_train)
+        
+        #val set
+        a_val = np.dot(X_val, V_nn.T)+bk_nn
+        if activation == my_prelu:
+            P_val = activation(a_val,regs[i,2])
+        else:
+            P_val = activation(a_val)        
+        y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+        RMSE_val[i] = rmse(y_pred_val, y_val)
+        
+
+    print('rmse on train set:')
+    print(RMSE_train.min())
+    print('params(alpha, beta,p(?)) train: ')
+    print(regs[RMSE_train.argmin()])
+    
+    print('rmse on val set:')
+    print(RMSE_val.min())
+    print('params(alpha, beta,p(?)) val: ')
+    print(regs[RMSE_val.argmin()])
+    
+    opts[j,:]=regs[RMSE_val.argmin()]
+    
+  
     
     
-
-print('rmse on train set:')
-print(RMSE_train.min())
-print('params(alpha, beta,p(?)) train: ')
-print(regs[RMSE_train.argmin()])
-
-print('rmse on val set:')
-print(RMSE_val.min())
-print('params(alpha, beta,p(?)) val: ')
-print(regs[RMSE_val.argmin()])
-
-
-opt=regs[RMSE_val.argmin()]
 # create initial parameters for nn using fits from Q4
 init_ww_B = new_w_fit[:-1, -1]
 init_bb_B = new_w_fit[-1, :]
@@ -485,34 +521,34 @@ init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
 # fit neural network with fitted parameters from Q4
-ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, act, opt, init_B) #np.array([10,10])
+ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt2(X_train, y_train, activation, opt, init_B) #np.array([10,10])
 
 # calculate nn rmse on training set
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B 
-if act == my_prelu:
-    P_train = act(a_train,opt[i,2])
+if activation == my_prelu:
+    P_train = activation(a_train,opt[i,2])
 else:
-    P_train = act(a_train)
+    P_train = activation(a_train)
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
 
 # calculate nn rmse on validation set
 a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
-if act == my_prelu:
-    P_val = act(a_val,opt[2])
+if activation == my_prelu:
+    P_val = activation(a_val,opt[2])
 else:
-    P_val = act(a_val)
+    P_val = activation(a_val)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
 # calculate nn rmse on test set
 a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
-if act == my_prelu:
-    P_test = act(a_test,opt[2])
+if activation == my_prelu:
+    P_test = activation(a_test,opt[2])
 else:
-    P_test = act(a_test)
+    P_test = activation(a_test)
 y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
 print('RMSE for nn on test set: ')
 print(rmse(y_pred_test, y_test))
