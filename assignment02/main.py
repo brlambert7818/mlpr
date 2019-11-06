@@ -256,10 +256,12 @@ for kk in range(K):
 # bias X's for sigmoid
 X_bias_train = phi_linear(X_train)
 X_bias_val = phi_linear(X_val)
+X_bias_test = phi_linear(X_test)
 
 # Predict probabilities using sigmoid
 Pred_train = sigmoid(np.matmul(X_bias_train, Ws))
 Pred_val = sigmoid(np.matmul(X_bias_val, Ws))
+Pred_test = sigmoid(np.matmul(X_bias_test, Ws))
 
 
 # Fit linear regression using predictions from logreg to y_train
@@ -268,13 +270,17 @@ new_w_fit = fit_linreg(Pred_train, y_train, 10)
 # Calculate RMSE's
 y_pred_train = np.dot(phi_linear(Pred_train), new_w_fit)[:, -1]
 y_pred_val = np.dot(phi_linear(Pred_val), new_w_fit)[:, -1]
+y_pred_test = np.dot(phi_linear(Pred_test), new_w_fit)[:, -1]
 rmse_train_logreg_lin = rmse(y_pred_train, y_train)
 rmse_val_logreg_lin = rmse(y_pred_val, y_val)
+rmse_test_logreg_lin = rmse(y_pred_test, y_test)
 
 print('RMSE for reg. linear regression on logreg predictions on train set: ')
 print(rmse(y_pred_train, y_train))
 print('RMSE for reg. linear regression on logreg predictions on val set: ')
 print(rmse(y_pred_val, y_val))
+print('RMSE for reg. linear regression on logreg predictions on val set: ')
+print(rmse(y_pred_test, y_test))
 
 ### Q5
 # create initial randomized parameters for nn
@@ -293,6 +299,7 @@ ww_nn, bb_nn, V_nn, bk_nn = fit_nn_gradopt(X_train, y_train, 10, init)
 a_train = np.dot(X_train, V_nn.T) + bk_nn
 P_train = sigmoid(a_train)
 y_pred_train = np.dot(P_train, ww_nn) + bb_nn
+rmse_train_5a = rmse(y_pred_train, y_train)
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
 
@@ -300,6 +307,7 @@ print(rmse(y_pred_train, y_train))
 a_val = np.dot(X_val, V_nn.T) + bk_nn
 P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn) + bb_nn
+rmse_val_5a = rmse(y_pred_val, y_val)
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 ## Q5 B
@@ -318,6 +326,7 @@ ww_nn_B, bb_nn_B, V_nn_B, bk_nn_B = fit_nn_gradopt(X_train, y_train, 10, init_B)
 a_train = np.dot(X_train, V_nn_B.T) + bk_nn_B
 P_train = sigmoid(a_train)
 y_pred_train = np.dot(P_train, ww_nn_B) + bb_nn_B
+rmse_train_5b = rmse(y_pred_train, y_train)
 print('RMSE for nn on train set: ')
 print(rmse(y_pred_train, y_train))
 
@@ -325,6 +334,7 @@ print(rmse(y_pred_train, y_train))
 a_val = np.dot(X_val, V_nn_B.T) + bk_nn_B
 P_val = sigmoid(a_val)
 y_pred_val = np.dot(P_val, ww_nn_B) + bb_nn_B
+rmse_val_5b = rmse(y_pred_val, y_val)
 print('RMSE for nn on val set: ')
 print(rmse(y_pred_val, y_val))
 
@@ -332,7 +342,8 @@ print(rmse(y_pred_val, y_val))
 a_test = np.dot(X_test, V_nn_B.T) + bk_nn_B
 P_test = sigmoid(a_test)
 y_pred_test = np.dot(P_test, ww_nn_B) + bb_nn_B
-print('RMSE for nn on val set: ')
+rmse_test_5b = rmse(y_pred_test, y_test)
+print('RMSE for nn on test set: ')
 print(rmse(y_pred_test, y_test))
 
 
