@@ -538,10 +538,10 @@ def nn_cost3(params, X, yy=None, regs=None):
     ww_bar = np.dot(P.T, F_bar) + 2*beta*ww # K,
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
-#    A_bar = P_bar * P * (1 - P) # N,
-#    A_bar = P_bar * d_my_relu(A)# N,
-#    A_bar = P_bar * (1 - P**2)# N,
-    A_bar = P_bar * d_my_lrelu(A,p)# N,
+#    A_bar = P_bar * P * (1 - P) # N, # sigmoid derivative
+#    A_bar = P_bar * d_my_relu(A)# N, # relu der
+#    A_bar = P_bar * (1 - P**2)# N, # tanh derivative
+    A_bar = P_bar * d_my_lrelu(A,p)# N, #Prelu derivative
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
     bk_bar = np.sum(A_bar, 0)
 

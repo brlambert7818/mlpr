@@ -338,6 +338,11 @@ print(rmse(y_pred_test, y_test))
 
 from ct_support_code import *
 
+## SVD
+
+
+U, S, V = np.linalg.svd(X_train)
+
 #### Q6
 #init_ww_B = new_w_fit[:-1, -1]
 #init_bb_B = new_w_fit[-1, :]
