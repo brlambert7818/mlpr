@@ -441,6 +441,18 @@ for j in range(iters):
     print(regs[RMSE_val.argmin()])
     
     opts[j,:]=regs[RMSE_val.argmin()]
+    ww_nn, bb_nn, V_nn, bk_nn  = fit_nn_gradopt2(X_train, y_train, activation, opts[j,:], init_B)
+    
+    #test set
+    a_test = np.dot(X_test, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_test = activation(a_test,regs[i,2])
+    else:
+        P_test = activation(a_test)        
+    y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+    print('rmse optimal on test set:)
+    print(rmse(y_pred_test, y_test))
+    
     
   
     
