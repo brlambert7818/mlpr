@@ -363,8 +363,8 @@ init_V_B = Ws[:-1, :].T
 init_bk_B = Ws[-1, :]
 init_B = (init_ww_B, init_bb_B, init_V_B, init_bk_B)
 
-comb = 7
-iters = 4
+comb = 1
+iters = 2
 activation = my_tanh
 
 alphas = np.logspace(-2,2,comb,endpoint=True)
@@ -381,6 +381,7 @@ RMSE_val = np.zeros(regs.shape[0])
 
 opts = np.zeros((iters, regs.shape[1]))
 
+aa=[['aaaa'],['sss']]
 for j in range(iters):
 #    print('opts:')
 #    print(opts)
