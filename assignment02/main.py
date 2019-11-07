@@ -8,9 +8,9 @@ import numpy as np
 
 ### Q1
 
-#data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
+data = loadmat('/Users/onyskj/ct_data.mat', squeeze_me=True)
 #data = loadmat('/Users/brianlambert/Desktop/mlpr/assignment02/ct_data.mat', squeeze_me=True)
-data = loadmat('data/ct_data.mat', squeeze_me=True)
+#data = loadmat('data/ct_data.mat', squeeze_me=True)
 
 X_train = data['X_train']
 y_train = data['y_train']
@@ -283,37 +283,33 @@ y_test = data['y_test']
 #print(rmse(y_pred_test, y_test))
 #
 #### Q5
-## create initial randomized parameters for nn
-#K=10
-#scale_rand = 0.1 / np.sqrt(K)
-#init_ww = scale_rand * np.random.randn(K)
-#init_bb = 0.1 * np.random.randn(1)
-#init_V = scale_rand * np.random.randn(K, D)
-#init_bk = scale_rand * np.random.randn(K)
-#init = (init_ww, init_bb, init_V, init_bk)
-#
-## fit neural network with randomized initial parameters
-#ww_nn, bb_nn, V_nn, bk_nn, cost_list = fit_nn_gradopt(X_train, y_train, 10, init)
-## plt.clf()
-## plt.plot(cost_list)
-## plt.ylim((1000, 2000))
-## plt.show()
-#
-## calculate nn rmse on training set
-#a_train = np.dot(X_train, V_nn.T) + bk_nn
-#P_train = sigmoid(a_train)
-#y_pred_train = np.dot(P_train, ww_nn) + bb_nn
-#rmse_train_5a = rmse(y_pred_train, y_train)
-#print('RMSE for nn on train set: ')
-#print(rmse(y_pred_train, y_train))
-#
-## calculate nn rmse on validation set
-#a_val = np.dot(X_val, V_nn.T) + bk_nn
-#P_val = sigmoid(a_val)
-#y_pred_val = np.dot(P_val, ww_nn) + bb_nn
-#rmse_val_5a = rmse(y_pred_val, y_val)
-#print('RMSE for nn on val set: ')
-#print(rmse(y_pred_val, y_val))
+# create initial randomized parameters for nn
+K=10
+scale_rand = 0.1 / np.sqrt(K)
+init_ww = scale_rand * np.random.randn(K)
+init_bb = 0.1 * np.random.randn(1)
+init_V = scale_rand * np.random.randn(K, D)
+init_bk = scale_rand * np.random.randn(K)
+init = (init_ww, init_bb, init_V, init_bk)
+
+# fit neural network with randomized initial parameters
+ww_nn, bb_nn, V_nn, bk_nn, cost_list = fit_nn_gradopt(X_train, y_train, 10, init)
+
+# calculate nn rmse on training set
+a_train = np.dot(X_train, V_nn.T) + bk_nn
+P_train = sigmoid(a_train)
+y_pred_train = np.dot(P_train, ww_nn) + bb_nn
+rmse_train_5a = rmse(y_pred_train, y_train)
+print('RMSE for nn on train set: ')
+print(rmse(y_pred_train, y_train))
+
+# calculate nn rmse on validation set
+a_val = np.dot(X_val, V_nn.T) + bk_nn
+P_val = sigmoid(a_val)
+y_pred_val = np.dot(P_val, ww_nn) + bb_nn
+rmse_val_5a = rmse(y_pred_val, y_val)
+print('RMSE for nn on val set: ')
+print(rmse(y_pred_val, y_val))
 ### Q5 B
 #
 ## create initial parameters for nn using fits from Q4
@@ -492,17 +488,262 @@ for k in range(len(act_fns)):
 print(reg_opt_act)    
 print(RMSE_opt)
 
-# Testing 
-#ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, reg_opt_act[k], W_opt_act[-1])
-##test set
-#a_test = np.dot(X_test, V_nn.T)+bk_nn
-#if activation == my_prelu:
-#    P_test = activation(a_test,reg_opt_act[k][2])
-#else:
-#    P_test = activation(a_test)
-#y_pred_test = np.dot(P_test,ww_nn) + bb_nn
-#print(act_fns_names[k]+': rmse optimal on test set:')
-#print(rmse(y_pred_test, y_test))
+#activation = my_prelu
+#betterStart = init_B
+#many = 2 
+#
+#for i in range(2):
+#    # Testing 
+#    ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, my_opts, betterStart)
+#    better_Start = (ww_nn, bb_nn, V_nn, bk_nn)
+#    
+#    #train set
+#    a_train = np.dot(X_train, V_nn.T)+bk_nn
+#    if activation == my_prelu:
+#        P_train = activation(a_train,my_opts[2])
+#    else:
+#        P_train = activation(a_train)
+#    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+#    RMSE_opt_train = rmse(y_pred_train, y_train)
+#    print('act(sig) rmse train: '+str(RMSE_opt_train))
+#
+#    #val set
+#    a_val = np.dot(X_val, V_nn.T)+bk_nn
+#    if activation == my_prelu:
+#        P_val = activation(a_val,my_opts[2])
+#    else:
+#        P_val = activation(a_val)
+#    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+#    RMSE_opt_val = rmse(y_pred_val, y_val)
+#    print('act(sig) rmse val: '+str(RMSE_opt_val))
+#    
+#    #test set
+#    a_test = np.dot(X_test, V_nn.T)+bk_nn
+#    if activation == my_prelu:
+#        P_test = activation(a_test,my_opts[2])
+#    else:
+#        P_test = activation(a_test)
+#    y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+#    print('sig: rmse optimal on test set:')
+#    print(rmse(y_pred_test, y_test))
+    
+
+### Recover best weights
+D = X_train.shape[1]
+K=10
+scale_rand = 0.1 / np.sqrt(K)
+init_ww = scale_rand * np.random.randn(K)
+init_bb = 0.1 * np.random.randn(1)
+init_V = scale_rand * np.random.randn(K, D)
+init_bk = scale_rand * np.random.randn(K)
+init_B = (init_ww, init_bb, init_V, init_bk)
+init_permanent = (init_ww, init_bb, init_V, init_bk)
+
+# params for finding best reg.
+comb = 1 # size of range of values for reg
+iters = 2 # how many times to narrow down
+upper_reg = np.log10(10) # upper limit of alpha, beta regularisers
+
+# activation functions
+act_fns_names = ['sigmoid', 'tanh', 'ReLU', 'PReLU']
+act_fns = [sigmoid, my_tanh, my_relu, my_prelu]
+
+my_opts={'sigmoid': np.array([8.04575749, 0.06309573]), 'tanh': np.array([9.95424251, 9.51624945]), 
+         'ReLU': np.array([ 9.51404544, 11.59260657]), 'PReLU': np.array([2.51188643, 0.15848932, 0.02511886])}
+
+W_opt_act = [] #store optimal weights for NN with different activation function
+reg_opt_act = [] #store optimal regularisation constants
+RMSE_opt = []
+for k in range(len(act_fns)):
+    print('-----'+act_fns_names[k]+'-----')
+    activation = act_fns[k]
+    init_B = init_permanent # start with the same random weigths for each activaiton fn
+    alphas = np.logspace(np.log10(lb(my_opts[act_fns_names[k]][0])),np.log10(ub(my_opts[act_fns_names[k]][0])),comb,endpoint=True)
+    betas = np.logspace(np.log10(lb(my_opts[act_fns_names[k]][1])),np.log10(ub(my_opts[act_fns_names[k]][1])),comb,endpoint=True)
+    if activation == my_prelu:
+        ps = np.logspace(np.log10(lb(my_opts[act_fns_names[k]][2])),np.log10(ub(my_opts[act_fns_names[k]][2])),comb,endpoint=True)
+        regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+    else:
+        regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
+    
+    RMSE_train = np.zeros(regs.shape[0])
+    RMSE_val = np.zeros(regs.shape[0])
+    W=[] #to store optimal(initialisation) weights for each 'narrowing-down' iteration
+    opts = np.zeros((iters, regs.shape[1])) #to store optimal reg.
+    
+    for j in range(iters):
+        print('===narrow iteration: '+str(j))
+        if np.any(opts):
+            alphas = np.logspace(np.log10(lb(opts[j-1,0])),np.log10(ub(opts[j-1,0])),comb,endpoint=True)
+            betas = np.logspace(np.log10(lb(opts[j-1,1])),np.log10(ub(opts[j-1,1])),comb,endpoint=True)
+            init_B = W[RMSE_val.argmin()] # initialisation weights using most optimal weights
+            W = []
+            if activation == my_prelu:
+                ps = np.logspace(np.log10(lb(opts[j-1,2])),np.min(np.log10(ub(opts[j-1,2])),0),comb,endpoint=True)
+                regs = np.array([[alpha, beta, p] for alpha in alphas for beta in betas for p in ps])
+            else:
+                regs = np.array([[alpha, beta] for alpha in alphas for beta in betas])
+        RMSE_train = np.zeros(regs.shape[0])
+        RMSE_val = np.zeros(regs.shape[0])
+        for i in range(regs.shape[0]):
+            print('param iteration: '+str(i))
+            ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, regs[i,:], init_B)
+            W.append((ww_nn, bb_nn, V_nn, bk_nn))
+            
+            #train set
+            a_train = np.dot(X_train, V_nn.T)+bk_nn
+            if activation == my_prelu:
+                P_train = activation(a_train,regs[i,2])
+            else:
+                P_train = activation(a_train)
+            y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+            RMSE_train[i] = rmse(y_pred_train, y_train)
+    
+            #val set
+            a_val = np.dot(X_val, V_nn.T)+bk_nn
+            if activation == my_prelu:
+                P_val = activation(a_val,regs[i,2])
+            else:
+                P_val = activation(a_val)
+            y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+            RMSE_val[i] = rmse(y_pred_val, y_val)
+        
+        # optimal rmse and weights train set
+        print(act_fns_names[k]+': rmse on train set:')
+        print(RMSE_train.min())
+        print(act_fns_names[k]+': params(alpha, beta,p(?)) train: ')
+        print(regs[RMSE_train.argmin()])
+
+        # optimal rmse and weights val set
+        print(act_fns_names[k]+': rmse on val set:')
+        print(RMSE_val.min())
+        print(act_fns_names[k]+': params(alpha, beta,p(?)) val: ')
+        print(regs[RMSE_val.argmin()])
+    
+        opts[j,:]=regs[RMSE_val.argmin()] # store optimal reg constants for next iteration
+        
+    ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, opts[j,:], init_B)
+    
+    ## Store for later comparison RMSES, weights, regl.
+    #train set
+    a_train = np.dot(X_train, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_train = activation(a_train,opts[j,2])
+    else:
+        P_train = activation(a_train)
+    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+    RMSE_opt_train = rmse(y_pred_train, y_train)
+
+    #val set
+    a_val = np.dot(X_val, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_val = activation(a_val,opts[j,2])
+    else:
+        P_val = activation(a_val)
+    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+    RMSE_opt_val = rmse(y_pred_val, y_val)
+    
+    #test set
+    a_test = np.dot(X_test, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_test = activation(a_test,opts[j,2])
+    else:
+        P_test = activation(a_test)
+    y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+    RMSE_opt_test = rmse(y_pred_test, y_test)
+    print(act_fns_names[k]+': rmse optimal on test set:')
+    print(rmse(y_pred_test, y_test))
+    
+    RMSE_opt.append([RMSE_opt_train,RMSE_opt_val,RMSE_opt_test])
+    W_opt_act.append(init_B)    
+    reg_opt_act.append(opts[-1,:])
+    
+print(reg_opt_act)    
+print(RMSE_opt)
+from ct_support_code import *
+best_RMSE = dict()
+best_weights = dict()
+best_regs = dict()
+
+act_fns_names = ['sigmoid', 'tanh', 'ReLU', 'PReLU']
+act_fns = [sigmoid, my_tanh, my_relu, my_prelu]
+for k in range(len(act_fns)):
+    print('-----'+act_fns_names[k]+'-----')
+    activation = act_fns[k]
+    best_RMSE[act_fns_names[k]] = RMSE_opt[k]
+    best_weights[act_fns_names[k]] = W_opt_act[k]
+    best_regs[act_fns_names[k]] = reg_opt_act[k]
+    
+    
+    ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, activation, best_regs[act_fns_names[k]], best_weights[act_fns_names[k]])
+    
+    #train set
+    a_train = np.dot(X_train, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_train = activation(a_train,opts[j,2])
+    else:
+        P_train = activation(a_train)
+    y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+    print(act_fns_names[k]+': rmse optimal on train set:')
+    print(rmse(y_pred_train, y_train))
+
+    #val set
+    a_val = np.dot(X_val, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_val = activation(a_val,opts[j,2])
+    else:
+        P_val = activation(a_val)
+    y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+    print(act_fns_names[k]+': rmse optimal on val set:')
+    print(rmse(y_pred_val, y_val))
+    
+    #test set
+    a_test = np.dot(X_test, V_nn.T)+bk_nn
+    if activation == my_prelu:
+        P_test = activation(a_test,opts[j,2])
+    else:
+        P_test = activation(a_test)
+    y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+    print(act_fns_names[k]+': rmse optimal on test set:')
+    print(rmse(y_pred_test, y_test))
+    
+
+print(best_RMSE)
+print(best_regs)
+    
+
+
+ww_nn, bb_nn, V_nn, bk_nn, costlist  = fit_nn_gradopt2(X_train, y_train, my_prelu, best_regs['PReLU'], best_weights['PReLU'])
+    
+#train set
+a_train = np.dot(X_train, V_nn.T)+bk_nn
+if activation == my_prelu:
+    P_train = activation(a_train,opts[j,2])
+else:
+    P_train = activation(a_train)
+y_pred_train = np.dot(P_train,ww_nn) + bb_nn
+print(act_fns_names[k]+': rmse optimal on train set:')
+print(rmse(y_pred_train, y_train))
+
+#val set
+a_val = np.dot(X_val, V_nn.T)+bk_nn
+if activation == my_prelu:
+    P_val = activation(a_val,opts[j,2])
+else:
+    P_val = activation(a_val)
+y_pred_val = np.dot(P_val,ww_nn) + bb_nn
+print(act_fns_names[k]+': rmse optimal on val set:')
+print(rmse(y_pred_val, y_val))
+
+#test set
+a_test = np.dot(X_test, V_nn.T)+bk_nn
+if activation == my_prelu:
+    P_test = activation(a_test,opts[j,2])
+else:
+    P_test = activation(a_test)
+y_pred_test = np.dot(P_test,ww_nn) + bb_nn
+print(act_fns_names[k]+': rmse optimal on test set:')
+print(rmse(y_pred_test, y_test))
 
 
 #### PLOT COST + DERIVATIVES

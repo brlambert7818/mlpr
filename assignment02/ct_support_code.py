@@ -118,6 +118,8 @@ def minimize_list(cost, init_list, args):
 
     The Matlab code comes with a different optimizer, so won't give the same
     results.
+    
+    The output included a list of cost on each iterations and optimised parameters
     """
     opt = {'maxiter': 500, 'disp': False}
     init, unwrap = params_wrap(init_list)
@@ -173,13 +175,14 @@ def fit_linreg_gradopt(X, yy, alpha):
        np.sum(((np.dot(X,ww) + bb) - yy)**2) + alpha*np.dot(ww,ww)
 
      Inputs:
-             X N,D design matrix of input features
-            yy N,  real-valued targets
-         alpha     scalar regularization constant
+             X N,D      design matrix of input features
+            yy N,       real-valued targets
+         alpha          scalar regularization constant
 
      Outputs:
-            ww D,  fitted weights
-            bb     scalar fitted bias
+            ww D,       fitted weights
+            bb          scalar fitted bias
+            cost_list   list of costs as a function of iterations
     """
     D = X.shape[1]
     args = (X, yy, alpha)
@@ -200,9 +203,9 @@ def fit_logreg_gradopt(X, yy, alpha, init):
          (minimize_list) to improve the regularized least squares cost:
 
          Inputs:
-                 X N,D design matrix of input features
-                yy N,  real-valued targets
-             alpha     scalar regularization constant
+                 X N,D      design matrix of input features
+                yy N,       real-valued targets
+             alpha          scalar regularization constant
               init (ww, bb), where:
                     --------------------------------
                         ww K,  initial weights
@@ -210,8 +213,9 @@ def fit_logreg_gradopt(X, yy, alpha, init):
                     --------------------------------
 
          Outputs:
-                ww D,  fitted weights
-                bb     scalar fitted bias
+                ww D,       fitted weights
+                bb          scalar fitted bias
+                cost_list   list of costs as a function of iterations
         """
     args = (X, yy, alpha)
     fit = minimize_list(logreg_cost, init, args)
@@ -390,10 +394,11 @@ def fit_nn_gradopt2(X, yy, activation, regs, init):
                     --------------------------------
 
              Outputs:
-                    ww K,  fitted hidden-output weights
-                    bb     fitted scalar output bias
-                    V K,D  fitted hidden-input weights
-                    bk K,  fitted hidden biases
+                    ww K,       fitted hidden-output weights
+                    bb          fitted scalar output bias
+                    V K,D       fitted hidden-input weights
+                    bk K,       fitted hidden biases
+                    cost_ list  list of cost on each iteration
             """
     args = (X, yy, activation, regs)
     min_list = minimize_list(nn_cost2, init, args)
@@ -419,9 +424,10 @@ def nn_cost2(params, X, yy=None, activation=None, regs=None):
                          V K,D hidden-input weights
                         bk K,  hidden biases
                     --------------------------------
-                  X N,D input design matrix
-                 yy N,  regression targets
-              alpha     scalar regularization for weights
+                  X N,D     input design matrix
+                 yy N,      regression targets
+              activation    activation function
+              regs          regularising constants (alpha, beta, p(for PReLU))
 
      Outputs:
                      E  sum of squares error
@@ -436,9 +442,11 @@ def nn_cost2(params, X, yy=None, activation=None, regs=None):
     elif len(regs)==2:
         alpha, beta = regs
 
+
     # Forwards computation of cost
     A = np.dot(X, V.T) + bk[None,:] # N,K
     P = None
+    # Different activation functions
     if activation == my_prelu:
         P = activation(A, p) # N,K
     else:
@@ -456,6 +464,7 @@ def nn_cost2(params, X, yy=None, activation=None, regs=None):
     bb_bar = np.sum(F_bar) # scalar
     P_bar = np.dot(F_bar[:,None], ww[None,:]) # N,
 
+    # A_bar for different activation functions
     A_bar = None
     if activation == sigmoid:
         A_bar = P_bar * P * (1 - P)  # N,
@@ -467,7 +476,7 @@ def nn_cost2(params, X, yy=None, activation=None, regs=None):
         A_bar = P_bar * d_my_prelu(A,p)# N,
 
     V_bar = np.dot(A_bar.T, X) + 2*alpha*V # K,
-    bk_bar = np.sum(A_bar, 0) # scalar
+    bk_bar = np.sum(A_bar, 0) 
 
     return E, (ww_bar, bb_bar, V_bar, bk_bar)
 
@@ -482,12 +491,28 @@ def d_my_relu(x): return (x[:,:]>0)*1
 def d_my_prelu(x,p): return (x[:,:]>0)*1+(x[:,:]<=0)*p
 
 def lb(a):
+    """ Returns a value slightly lower than a. Used to create a range around an optimal
+        value in optimising regularising constants.
+        
+        Inputs:
+            a   
+        Outputs:
+            Value slightly lower than a
+    """
     if a<=1:
         return 10**(np.log10(a)-0.25)
     else:
         return a-np.log10(a)
 
 def ub(a):
+    """ Returns a value slightly lower than a. Used to create a range around an optimal
+        value in optimising regularising constants.
+        
+        Inputs:
+            a   
+        Outputs:
+            Value slightly lower than a
+    """
     if a<=1:
         return 10**(np.log10(a)+0.25)
     else:
