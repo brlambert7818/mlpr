@@ -375,7 +375,6 @@ upper_reg = np.log10(10) # upper limit of alpha, beta regularisers
 # activation functions
 act_fns_names = ['sigmoid', 'tanh', 'ReLU', 'PReLU']
 act_fns = [sigmoid, my_tanh, my_relu, my_prelu]
-
 W_opt_act = [] #store optimal weights for NN with different activation function
 reg_opt_act = [] #store optimal regularisation constants
 RMSE_opt = []
